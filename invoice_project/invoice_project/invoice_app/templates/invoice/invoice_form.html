@@ -1,0 +1,167 @@
+{% extends 'invoice_app/base.html' %}
+{% block title %}{{ invoice_type|capfirst }} Invoice{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto bg-white p-6 rounded-lg shadow-md">
+
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-blue-600">{{ invoice_type|capfirst }} Invoice Form</h1>
+        <a href="{% url 'dashboard' %}" class="text-gray-500 hover:underline">Back to Dashboard</a>
+    </div>
+
+    <!-- Upload Logo -->
+    <div class="mb-4">
+        <label class="block text-gray-700 font-semibold mb-1">Upload Company Logo</label>
+        <input type="file" name="logo" class="border rounded p-2 w-full">
+    </div>
+
+    <!-- Invoice Info -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div>
+            <label class="block text-gray-700 font-semibold mb-1">Invoice No</label>
+            <input type="text" name="invoice_no" value="{{ invoice_no }}" class="border rounded p-2 w-full" readonly>
+        </div>
+        <div>
+            <label class="block text-gray-700 font-semibold mb-1">Date</label>
+            <input type="date" name="date" value="{{ date }}" class="border rounded p-2 w-full">
+        </div>
+    </div>
+
+    <!-- Customer / Patient Info -->
+    <div class="mb-4">
+        <label class="block text-gray-700 font-semibold mb-1">{{ customer_label }}</label>
+        <select name="customer" class="border rounded p-2 w-full">
+            {% for customer in customers %}
+                <option value="{{ customer.id }}">{{ customer.name }}</option>
+            {% endfor %}
+        </select>
+        <a href="{% url 'add_customer' %}" class="text-blue-500 hover:underline text-sm">+ Add New {{ customer_label }}</a>
+    </div>
+
+    {% if invoice_type == 'hospital' %}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div>
+            <label class="block text-gray-700 font-semibold mb-1">Doctor</label>
+            <select name="doctor" class="border rounded p-2 w-full">
+                {% for doctor in doctors %}
+                    <option value="{{ doctor.id }}">{{ doctor.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="block text-gray-700 font-semibold mb-1">Department</label>
+            <select name="department" class="border rounded p-2 w-full">
+                {% for dept in departments %}
+                    <option value="{{ dept.id }}">{{ dept.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if invoice_type == 'stationery' %}
+    <div class="mb-4">
+        <label class="block text-gray-700 font-semibold mb-1">Order Reference / PO No</label>
+        <input type="text" name="order_ref" class="border rounded p-2 w-full">
+    </div>
+    {% endif %}
+
+    <!-- Invoice Items Table -->
+    <div class="overflow-x-auto mb-4">
+        <table class="table-auto w-full border-collapse border border-gray-300">
+            <thead>
+                <tr class="bg-gray-100">
+                    <th class="border px-2 py-1">Item / Service</th>
+                    <th class="border px-2 py-1">Qty</th>
+                    <th class="border px-2 py-1">Price</th>
+                    <th class="border px-2 py-1">Tax %</th>
+                    <th class="border px-2 py-1">Total</th>
+                    <th class="border px-2 py-1">Action</th>
+                </tr>
+            </thead>
+            <tbody id="invoice-items">
+                <!-- Initial Row -->
+                <tr>
+                    <td class="border px-2 py-1"><input type="text" name="item_name" class="border rounded p-1 w-full"></td>
+                    <td class="border px-2 py-1"><input type="number" name="qty" value="1" class="border rounded p-1 w-full"></td>
+                    <td class="border px-2 py-1"><input type="number" name="price" value="0" class="border rounded p-1 w-full"></td>
+                    <td class="border px-2 py-1"><input type="number" name="tax" value="0" class="border rounded p-1 w-full"></td>
+                    <td class="border px-2 py-1 text-right">0</td>
+                    <td class="border px-2 py-1 text-center">
+                        <button type="button" class="bg-red-500 text-white px-2 py-1 rounded remove-item">Remove</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <button type="button" id="add-item" class="mt-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500">+ Add Item</button>
+    </div>
+
+    <!-- Totals -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+        <div>Subtotal: ₹<span id="subtotal">0</span></div>
+        <div>Tax: ₹<span id="tax">0</span></div>
+        <div>Discount: ₹<input type="number" id="discount" value="0" class="border rounded p-1 w-24"></div>
+        <div class="font-bold">Grand Total: ₹<span id="grand-total">0</span></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="space-x-2">
+        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-500">Save Invoice</button>
+        <a href="#" class="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300">Preview</a>
+        <a href="#" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500">Download PDF</a>
+    </div>
+</div>
+
+<!-- JS for dynamic rows and totals -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const addBtn = document.getElementById('add-item');
+    const tbody = document.getElementById('invoice-items');
+    const discountInput = document.getElementById('discount');
+    
+    function calculateTotals() {
+        let subtotal = 0;
+        let tax = 0;
+        tbody.querySelectorAll('tr').forEach(row => {
+            const qty = parseFloat(row.querySelector('input[name="qty"]').value) || 0;
+            const price = parseFloat(row.querySelector('input[name="price"]').value) || 0;
+            const taxPercent = parseFloat(row.querySelector('input[name="tax"]').value) || 0;
+            const total = qty * price + (qty * price * taxPercent / 100);
+            row.querySelector('td:last-child').textContent = total.toFixed(2);
+            subtotal += qty * price;
+            tax += qty * price * taxPercent / 100;
+        });
+        const discount = parseFloat(discountInput.value) || 0;
+        document.getElementById('subtotal').textContent = subtotal.toFixed(2);
+        document.getElementById('tax').textContent = tax.toFixed(2);
+        document.getElementById('grand-total').textContent = (subtotal + tax - discount).toFixed(2);
+    }
+
+    addBtn.addEventListener('click', () => {
+        const newRow = tbody.rows[0].cloneNode(true);
+        newRow.querySelectorAll('input').forEach(input => input.value = input.name === 'qty' ? 1 : 0);
+        tbody.appendChild(newRow);
+        attachRemoveEvents();
+        calculateTotals();
+    });
+
+    function attachRemoveEvents() {
+        tbody.querySelectorAll('.remove-item').forEach(btn => {
+            btn.onclick = () => {
+                if(tbody.rows.length > 1) {
+                    btn.closest('tr').remove();
+                    calculateTotals();
+                }
+            };
+        });
+    }
+    
+    tbody.querySelectorAll('input').forEach(input => input.addEventListener('input', calculateTotals));
+    discountInput.addEventListener('input', calculateTotals);
+
+    attachRemoveEvents();
+    calculateTotals();
+});
+</script>
+{% endblock %}

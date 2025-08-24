@@ -1,0 +1,358 @@
+{% extends 'invoice/base.html' %}
+{% block title %}Shopping Invoice{% endblock %}
+
+{% block content %}
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+ <script src="https://cdn.tailwindcss.com"></script>
+<h2 class="text-2xl font-bold mb-6 text-gray-800">Create Hospital Invoice</h2>
+   
+<body class="bg-gray-100 p-6">
+<form id="hospital-invoice-form" class="bg-white p-6 rounded shadow-md space-y-6">
+
+    <!-- ==================== Logo & Hospital Info ==================== -->
+    <div class="flex space-x-6 items-center">
+        <div id="dropbox" class="border-2 border-dashed border-gray-400 p-4 w-32 h-32 flex items-center justify-center cursor-pointer">
+            <input type="file" class="hidden" accept="image/*">
+            <span>Upload Logo</span>
+        </div>
+        <img id="preview-logo" class="hidden w-32 h-32 object-contain" alt="Hospital Logo">
+        <div class="flex-1 space-y-2">
+            <label>Hospital / Clinic Name</label>
+            <input type="text" name="hospital_name" class="border p-2 w-64" required>
+
+            <label>Address</label>
+            <textarea name="hospital_address" class="border p-2 w-64" required></textarea>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label>Contact Number</label>
+                    <input type="text" name="hospital_contact" class="border p-2 w-full" required>
+                </div>
+                <div>
+                    <label>Email</label>
+                    <input type="email" name="hospital_email" class="border p-2 w-full" required>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label>GSTIN / PAN</label>
+                    <input type="text" name="hospital_gstin" class="border p-2 w-full">
+                </div>
+                <div>
+                    <label>Registration Number</label>
+                    <input type="text" name="hospital_reg_no" class="border p-2 w-full">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== Patient Info ==================== -->
+    <div class="space-y-2">
+        <h2 class="font-bold text-lg">Patient Information</h2>
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label>Patient Name</label>
+                <input type="text" name="patient_name" class="border p-2 w-full" required>
+            </div>
+            <div>
+                <label>Patient ID / MRN</label>
+                <input type="text" name="patient_id" class="border p-2 w-full" required>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4">
+            <div>
+                <label>Age</label>
+                <input type="number" name="patient_age" class="border p-2 w-full">
+            </div>
+            <div>
+                <label>Gender</label>
+                <select name="patient_gender" class="border p-2 w-full">
+                    <option value="">Select</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div>
+                <label>Contact Number</label>
+                <input type="text" name="patient_contact" class="border p-2 w-full">
+            </div>
+        </div>
+
+        <label>Address</label>
+        <textarea name="patient_address" class="border p-2 w-full"></textarea>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label>Doctor / Consultant Name</label>
+                <input type="text" name="doctor_name" class="border p-2 w-full">
+            </div>
+            <div>
+                <label>Admission Date</label>
+                <input type="date" name="admission_date" class="border p-2 w-full">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label>Discharge Date</label>
+                <input type="date" name="discharge_date" class="border p-2 w-full">
+            </div>
+            <div>
+                <label>Ward / Room / Bed</label>
+                <input type="text" name="ward_room_bed" class="border p-2 w-full">
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== Invoice Metadata ==================== -->
+    <div class="grid grid-cols-2 gap-4">
+        <div>
+            <label>Invoice Number</label>
+            <input type="text" name="invoice_no" class="border p-2 w-full" readonly value="HOSP-INV-001">
+        </div>
+        <div>
+            <label>Invoice Date</label>
+            <input type="date" name="invoice_date" class="border p-2 w-full" required>
+        </div>
+        <div>
+            <label>Payment Due Date / Terms</label>
+            <input type="text" name="payment_terms" class="border p-2 w-full">
+        </div>
+        <div>
+            <label>Reference / Appointment Number</label>
+            <input type="text" name="reference_no" class="border p-2 w-full">
+        </div>
+    </div>
+
+    <!-- ==================== Services & Items Table ==================== -->
+    <div>
+        <h2 class="font-bold text-lg mb-2">Services & Items</h2>
+        <table class="w-full border-collapse border">
+            <thead class="bg-gray-200">
+                <tr>
+                    <th class="border px-2 py-1">Service / Item</th>
+                    <th class="border px-2 py-1">Code / CPT</th>
+                    <th class="border px-2 py-1">Quantity / Units</th>
+                    <th class="border px-2 py-1">Rate / Unit Price</th>
+                    <th class="border px-2 py-1">Discount</th>
+                    <th class="border px-2 py-1">Tax / GST</th>
+                    <th class="border px-2 py-1">Total</th>
+                    <th class="border px-2 py-1">Action</th>
+                </tr>
+            </thead>
+            <tbody id="items-body">
+                <!-- JS will dynamically add rows here -->
+            </tbody>
+        </table>
+        <button type="button" onclick="addItemRow()" class="mt-2 px-4 py-2 bg-blue-600 text-white rounded">Add Service / Item</button>
+    </div>
+
+    <!-- ==================== Summary Section ==================== -->
+    <div class="grid grid-cols-2 gap-4">
+        <div></div>
+        <div class="space-y-2">
+            <div class="flex justify-between">
+                <span>Subtotal</span><span id="subtotal">₹0.00</span>
+            </div>
+            <div class="flex justify-between">
+                <span>Discount / Insurance</span><span id="discount-amount">₹0.00</span>
+            </div>
+            <div class="flex justify-between">
+                <span>Tax / GST</span><span id="tax-total">₹0.00</span>
+            </div>
+            <div class="flex justify-between font-bold">
+                <span>Grand Total</span><span id="grand-total">₹0.00</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== Payment Details ==================== -->
+    <div class="space-y-2">
+        <h2 class="font-bold text-lg">Payment Details</h2>
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label>Payment Method</label>
+                <select name="payment_method" class="border p-2 w-full">
+                    <option value="">Select</option>
+                    <option value="Cash">Cash</option>
+                    <option value="Card">Card</option>
+                    <option value="Online">Online</option>
+                    <option value="Insurance">Insurance</option>
+                </select>
+            </div>
+            <div>
+                <label>Advance Payment / Deposit</label>
+                <input type="number" name="advance_payment" class="border p-2 w-full">
+            </div>
+        </div>
+        <div>
+            <label>Balance / Amount Due</label>
+            <input type="number" name="balance_due" class="border p-2 w-full" readonly>
+        </div>
+    </div>
+
+    <!-- ==================== Notes / Footer ==================== -->
+    <div class="space-y-2">
+        <label>Notes / Thank You</label>
+        <textarea name="notes" class="border p-2 w-full">Get well soon! Thank you for choosing XYZ Hospital.</textarea>
+        <label>Terms & Conditions</label>
+        <textarea name="terms" class="border p-2 w-full">No refund after discharge. Authorized signature required.</textarea>
+    </div>
+
+    <div class="flex space-x-4">
+        <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded">Save Invoice</button>
+        <button type="button" onclick="previewInvoice()" class="px-4 py-2 bg-blue-600 text-white rounded">Preview PDF</button>
+        <button type="button" onclick="downloadPDF()" class="px-4 py-2 bg-yellow-600 text-white rounded">Download PDF</button>
+    </div>
+</form>
+
+<script>
+// ========== Services & Items ==========
+function addItemRow(name = '', code = '', qty = 1, rate = 0, discount = 0, tax = 0) {
+    const tbody = document.getElementById("items-body");
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+        <td class="border px-2 py-1"><input type="text" value="${name}" placeholder="Service / Item" class="border p-1 w-full service-name" onchange="updateTotals()"></td>
+        <td class="border px-2 py-1"><input type="text" value="${code}" placeholder="Code / CPT" class="border p-1 w-full service-code" onchange="updateTotals()"></td>
+        <td class="border px-2 py-1"><input type="number" value="${qty}" min="1" class="border p-1 w-16 qty" onchange="updateTotals()"></td>
+        <td class="border px-2 py-1"><input type="number" value="${rate}" min="0" class="border p-1 w-20 rate" onchange="updateTotals()"></td>
+        <td class="border px-2 py-1"><input type="number" value="${discount}" min="0" class="border p-1 w-20 discount" onchange="updateTotals()"></td>
+        <td class="border px-2 py-1"><input type="number" value="${tax}" min="0" class="border p-1 w-16 tax" onchange="updateTotals()"></td>
+        <td class="border px-2 py-1 total">₹0.00</td>
+        <td class="border px-2 py-1 text-center"><button type="button" onclick="removeRow(this)" class="text-red-600">Remove</button></td>
+    `;
+    tbody.appendChild(tr);
+    updateTotals();
+}
+
+function removeRow(button) {
+    button.closest("tr").remove();
+    updateTotals();
+}
+
+// ========== Calculation ==========
+function updateTotals() {
+    let subtotal = 0, discountTotal = 0, taxTotal = 0;
+
+    document.querySelectorAll("#items-body tr").forEach(tr => {
+        const qty = parseFloat(tr.querySelector(".qty").value) || 0;
+        const rate = parseFloat(tr.querySelector(".rate").value) || 0;
+        const discount = parseFloat(tr.querySelector(".discount").value) || 0;
+        const tax = parseFloat(tr.querySelector(".tax").value) || 0;
+
+        const total = (qty * rate - discount) + ((qty * rate - discount) * tax / 100);
+        tr.querySelector(".total").innerText = `₹${total.toFixed(2)}`;
+
+        subtotal += qty * rate;
+        discountTotal += discount;
+        taxTotal += (qty * rate - discount) * tax / 100;
+    });
+
+    const grandTotal = subtotal + taxTotal - discountTotal;
+    document.getElementById("subtotal").innerText = `₹${subtotal.toFixed(2)}`;
+    document.getElementById("discount-amount").innerText = `₹${discountTotal.toFixed(2)}`;
+    document.getElementById("tax-total").innerText = `₹${taxTotal.toFixed(2)}`;
+    document.getElementById("grand-total").innerText = `₹${grandTotal.toFixed(2)}`;
+
+    const advance = parseFloat(document.querySelector('[name="advance_payment"]').value) || 0;
+    document.querySelector('[name="balance_due"]').value = (grandTotal - advance).toFixed(2);
+}
+
+// Update balance when advance payment changes
+document.querySelector('[name="advance_payment"]').addEventListener("input", updateTotals);
+
+// ========== Logo Upload ==========
+const dropbox = document.getElementById('dropbox');
+const previewLogo = document.getElementById('preview-logo');
+dropbox.addEventListener('click', () => dropbox.querySelector('input').click());
+dropbox.querySelector('input').addEventListener('change', function() {
+    const file = this.files[0];
+    if(file){
+        const reader = new FileReader();
+        reader.onload = e => {
+            previewLogo.src = e.target.result;
+            previewLogo.classList.remove('hidden');
+        }
+        reader.readAsDataURL(file);
+    }
+});
+
+// ========== PDF Generation ==========
+function downloadPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p', 'pt', 'a4');
+
+    // ========== Bill From ==========
+    const hospitalName = document.querySelector('[name="hospital_name"]').value;
+    const hospitalAddress = document.querySelector('[name="hospital_address"]').value;
+    const hospitalContact = document.querySelector('[name="hospital_contact"]').value;
+    const hospitalEmail = document.querySelector('[name="hospital_email"]').value;
+
+    doc.setFontSize(14);
+    doc.text("Bill From:", 40, 40);
+    doc.setFontSize(12);
+    doc.text(`${hospitalName}`, 40, 60);
+    doc.text(`${hospitalAddress}`, 40, 75);
+    doc.text(`Contact: ${hospitalContact}`, 40, 90);
+    doc.text(`Email: ${hospitalEmail}`, 40, 105);
+
+    // ========== Bill To ==========
+    const patientName = document.querySelector('[name="patient_name"]').value;
+    const patientID = document.querySelector('[name="patient_id"]').value;
+    const invoiceNo = document.querySelector('[name="invoice_no"]').value;
+    const invoiceDate = document.querySelector('[name="invoice_date"]').value;
+
+    doc.setFontSize(14);
+    doc.text("Bill To:", 300, 40);
+    doc.setFontSize(12);
+    doc.text(`Name: ${patientName}`, 300, 60);
+    doc.text(`Patient ID: ${patientID}`, 300, 75);
+    doc.text(`Invoice No: ${invoiceNo}`, 300, 90);
+    doc.text(`Invoice Date: ${invoiceDate}`, 300, 105);
+
+    // ========== Items Table ==========
+    doc.autoTable({ html: '#items-body', startY: 130, theme: 'grid' });
+
+    // ========== Totals ==========
+    const subtotal = document.getElementById("subtotal").innerText;
+    const discount = document.getElementById("discount-amount").innerText;
+    const tax = document.getElementById("tax-total").innerText;
+    const grandTotal = document.getElementById("grand-total").innerText;
+    const advance = parseFloat(document.querySelector('[name="advance_payment"]').value) || 0;
+    const balance = parseFloat(document.querySelector('[name="balance_due"]').value) || 0;
+
+    doc.text(`Subtotal: ${subtotal}`, 400, doc.lastAutoTable.finalY + 20);
+    doc.text(`Discount: ${discount}`, 400, doc.lastAutoTable.finalY + 35);
+    doc.text(`Tax: ${tax}`, 400, doc.lastAutoTable.finalY + 50);
+    doc.text(`Grand Total: ${grandTotal}`, 400, doc.lastAutoTable.finalY + 65);
+    doc.text(`Advance Payment: ₹${advance.toFixed(2)}`, 400, doc.lastAutoTable.finalY + 80);
+    doc.text(`Balance Due: ₹${balance.toFixed(2)}`, 400, doc.lastAutoTable.finalY + 95);
+
+    // ========== Notes ==========
+    const notes = document.querySelector('[name="notes"]').value;
+    doc.text(`Notes: ${notes}`, 40, doc.lastAutoTable.finalY + 120);
+
+    // ========== Logo ==========
+    if(previewLogo.src){
+        doc.addImage(previewLogo.src, 'PNG', 450, 20, 100, 50);
+    }
+
+    doc.save("hospital_invoice.pdf");
+}
+
+// ========== Form Submission ==========
+document.getElementById("hospital-invoice-form").addEventListener("submit", function(e){
+    e.preventDefault();
+    alert("Invoice data saved! You can preview or download PDF.");
+});
+
+// Initialize first empty row
+addItemRow();
+</script>
+
+
+{% endblock %}

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>InvoiceGen - {% block title %}{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Tailwind CSS v3 official CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F3F4F6; /* soft gray background */
+        }
+        .active-link {
+            color: #1F2937; /* dark gray for active */
+            font-weight: 700;
+        }
+        a:hover {
+            color: #F59E0B; /* amber for hover accent */
+        }
+        header, footer {
+            background-color: #FFFFFF;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- HEADER -->
+    <header class="shadow-md p-4 flex justify-between items-center">
+        <div class="text-2xl font-bold text-gray-800">InvoiceGen</div>
+
+        <!-- Desktop Nav -->
+        <nav class="hidden md:flex space-x-6 items-center">
+            <a href="{% url 'dashboard' %}" class="{% if request.path == '/' %}active-link{% endif %}">Dashboard</a>
+            <a href="#why-choose-us" class="hover:text-blue-600">Why Choose Us</a>
+            <a href="{% url 'pricing' %}" class="{% if 'products' in request.path %}active-link{% endif %}">Pricing</a>
+            <a href="#footer" class="hover:text-blue-600">Contact Us</a>
+        </nav>
+
+        <!-- Mobile Hamburger -->
+        <div class="md:hidden">
+            <button id="menu-btn" class="focus:outline-none">
+                <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- MOBILE MENU -->
+    <nav id="mobile-menu" class="hidden md:hidden bg-white shadow-lg p-4">
+        <ul class="flex flex-col space-y-2">
+            <li><a href="{% url 'dashboard' %}" class="block">Dashboard</a></li>
+            <li><a href="#why-choose-us" class="block">Why Choose Us</a></li>
+            <li><a href="{% url 'pricing' %}" class="block">Pricing</a></li>
+            <li><a href="#footer" class="block">Contact Us</a></li>
+        </ul>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 p-6">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- FOOTER -->
+    <footer id="footer" class="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-12 mt-12 rounded-t-2xl shadow-inner">
+      <div class="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
+
+        <!-- About -->
+        <div>
+          <h3 class="font-bold text-xl mb-3">InvoiceGen</h3>
+          <p class="text-blue-100 leading-relaxed text-sm">
+            Smart, simple, and professional invoice generation for every business type.
+          </p>
+        </div>
+
+        <!-- Quick Links -->
+        <div>
+          <h3 class="font-bold text-xl mb-2 cursor-pointer md:cursor-auto flex justify-between items-center" onclick="toggleSection('quick-links')">
+            Quick Links
+            <svg class="w-4 h-4 md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          </h3>
+          <ul id="quick-links" class="space-y-2 text-blue-100 hidden md:block">
+            <li><a href="#" class="flex items-center gap-2 hover:text-white transition">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg> Home</a></li>
+            <li><a href="#" class="flex items-center gap-2 hover:text-white transition">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 14h-2v-2h2v2zm0-4h-2V7h2v5z"/></svg> Features</a></li>
+            <li><a href="#" class="flex items-center gap-2 hover:text-white transition">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M3 3h18v2H3V3zm0 14h18v2H3v-2zm0-7h18v2H3v-2z"/></svg> Pricing</a></li>
+            <li><a href="#" class="flex items-center gap-2 hover:text-white transition">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M21 8V7l-3 2-2-1-6 6-4-4-5 5V19h19V8z"/></svg> Contact</a></li>
+          </ul>
+        </div>
+
+        <!-- Support -->
+        <div>
+          <h3 class="font-bold text-xl mb-2 cursor-pointer md:cursor-auto flex justify-between items-center" onclick="toggleSection('support-links')">
+            Support
+            <svg class="w-4 h-4 md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          </h3>
+          <ul id="support-links" class="space-y-2 text-blue-100 hidden md:block">
+            <li><a href="#" class="flex items-center gap-2 hover:text-white transition"><svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 0a12 12 0 1012 12A12 12 0 0012 0zm1 17h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg> Help Center</a></li>
+            <li><a href="#" class="flex items-center gap-2 hover:text-white transition"><svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 0a12 12 0 1012 12A12 12 0 0012 0zm1 17h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg> FAQs</a></li>
+            <li><a href="#" class="flex items-center gap-2 hover:text-white transition"><svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M3 4h18v2H3V4zm0 14h18v2H3v-2zm0-7h18v2H3v-2z"/></svg> Privacy Policy</a></li>
+            <li><a href="#" class="flex items-center gap-2 hover:text-white transition"><svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 0L1 5v14l11 5 11-5V5L12 0zm0 18l-7-3.2V7l7 3.2 7-3.2v7.8L12 18z"/></svg> Terms of Service</a></li>
+          </ul>
+        </div>
+
+        <!-- Contact -->
+        <div>
+          <h3 class="font-bold text-xl mb-2 cursor-pointer md:cursor-auto flex justify-between items-center" onclick="toggleSection('contact-links')">
+            Get in Touch
+            <svg class="w-4 h-4 md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          </h3>
+          <div id="contact-links" class="space-y-2 hidden md:block">
+            <p class="flex items-center gap-2 text-blue-100 text-sm">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5z"/></svg>
+              support@invoicegen.com
+            </p>
+            <p class="flex items-center gap-2 text-blue-100 text-sm">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.27 11.36 11.36 0 003.56.57 1 1 0 011 1v3.6a1 1 0 01-1 1A16 16 0 013 5a1 1 0 011-1h3.6a1 1 0 011 1 11.36 11.36 0 00.57 3.56 1 1 0 01-.27 1.11l-2.28 2.12z"/></svg>
+              +91 98765 43210
+            </p>
+
+            <!-- Social Media -->
+            <div class="flex gap-4 mt-2">
+                <a href="#" class="hover:scale-110 transition transform"><img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" class="w-6 h-6" alt="Facebook"></a>
+                <a href="#" class="hover:scale-110 transition transform"><img src="https://cdn-icons-png.flaticon.com/512/733/733558.png" class="w-6 h-6" alt="Instagram"></a>
+                <a href="#" class="hover:scale-110 transition transform"><img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" class="w-6 h-6" alt="YouTube"></a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom -->
+      <div class="text-center mt-8 border-t border-blue-500 pt-4 text-blue-200 text-sm">
+        © 2025 InvoiceGen. All rights reserved.
+      </div>
+    </footer>
+
+    <!-- JS for mobile menu toggle -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const btn = document.getElementById('menu-btn');
+        const menu = document.getElementById('mobile-menu');
+        if(btn && menu){
+            btn.addEventListener('click', () => menu.classList.toggle('hidden'));
+        }
+
+        // Footer collapsible sections only on mobile
+        function toggleSection(id) {
+            const section = document.getElementById(id);
+            if(section && window.innerWidth < 768){
+                section.classList.toggle('hidden');
+            }
+        }
+        window.toggleSection = toggleSection;
+    });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,160 @@
+{% extends "invoice/base.html" %}
+{% block title %}Pricing{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-6 py-12">
+    <!-- Page Header -->
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold text-gray-800">Our Pricing Plans</h1>
+        <p class="text-gray-600 mt-2">Choose a plan that fits your needs</p>
+
+        <!-- Monthly/Yearly Toggle -->
+        <div class="flex justify-center items-center mt-6 space-x-4">
+            <span class="font-semibold">Monthly</span>
+            <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" value="" class="sr-only peer">
+                <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 transition-colors"></div>
+                <span class="ml-2 font-semibold">Yearly (10% off)</span>
+            </label>
+        </div>
+    </div>
+
+    <!-- Pricing Cards -->
+    <div class="grid sm:grid-cols-1 md:grid-cols-3 gap-8">
+
+        <!-- Basic Plan -->
+        <div class="bg-white shadow-lg rounded-xl p-6 text-center border hover:shadow-xl transition relative">
+            <h2 class="text-2xl font-semibold mb-4">Basic</h2>
+            <p class="text-4xl font-bold text-gray-900 mb-2">₹499 <span class="text-base font-normal">/month</span></p>
+            <ul class="text-gray-600 mb-6 space-y-3">
+                <li class="flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414L8.414 15l-4.121-4.121a1 1 0 011.414-1.414L8.414 12.586l7.879-7.879a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                    5 Invoices / month
+                </li>
+                <li class="flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414L8.414 15l-4.121-4.121a1 1 0 011.414-1.414L8.414 12.586l7.879-7.879a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                    Customer Management
+                </li>
+                <li class="flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414L8.414 15l-4.121-4.121a1 1 0 011.414-1.414L8.414 12.586l7.879-7.879a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                    Email Support
+                </li>
+            </ul>
+            <a href="#" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">Choose Plan</a>
+        </div>
+
+        <!-- Standard Plan -->
+        <div class="bg-blue-600 shadow-lg rounded-xl p-6 text-center text-white border-2 border-blue-700 scale-105 relative">
+            <!-- Most Popular Badge -->
+            <div class="absolute top-0 right-0 bg-yellow-400 text-black px-3 py-1 rounded-bl-lg font-semibold text-sm">
+                Most Popular
+            </div>
+            <h2 class="text-2xl font-semibold mb-4">Standard</h2>
+            <p class="text-4xl font-bold mb-2">₹999 <span class="text-base font-normal">/month</span></p>
+            <ul class="mb-6 space-y-3">
+                <li class="flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414L8.414 15l-4.121-4.121a1 1 0 011.414-1.414L8.414 12.586l7.879-7.879a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                    50 Invoices / month
+                </li>
+                <li class="flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414L8.414 15l-4.121-4.121a1 1 0 011.414-1.414L8.414 12.586l7.879-7.879a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                    Customer & Product Management
+                </li>
+                <li class="flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414L8.414 15l-4.121-4.121a1 1 0 011.414-1.414L8.414 12.586l7.879-7.879a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                    Priority Support
+                </li>
+            </ul>
+            <a href="#" class="bg-white text-blue-600 px-6 py-2 rounded-lg hover:bg-gray-200">Choose Plan</a>
+        </div>
+
+        <!-- Premium Plan -->
+        <div class="bg-white shadow-lg rounded-xl p-6 text-center border hover:shadow-xl transition relative">
+            <h2 class="text-2xl font-semibold mb-4">Premium</h2>
+            <p class="text-4xl font-bold text-gray-900 mb-2">₹1999 <span class="text-base font-normal">/month</span></p>
+            <ul class="text-gray-600 mb-6 space-y-3">
+                <li class="flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414L8.414 15l-4.121-4.121a1 1 0 011.414-1.414L8.414 12.586l7.879-7.879a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                    Unlimited Invoices
+                </li>
+                <li class="flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414L8.414 15l-4.121-4.121a1 1 0 011.414-1.414L8.414 12.586l7.879-7.879a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                    Customer, Product & Analytics
+                </li>
+                <li class="flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414L8.414 15l-4.121-4.121a1 1 0 011.414-1.414L8.414 12.586l7.879-7.879a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                    Dedicated Support
+                </li>
+            </ul>
+            <a href="#" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">Choose Plan</a>
+        </div>
+
+    </div>
+
+    <!-- Compare Features Table -->
+    <div class="mt-16 overflow-x-auto">
+        <h3 class="text-2xl font-bold mb-6 text-center">Compare Features</h3>
+        <table class="min-w-full border border-gray-300 divide-y divide-gray-300">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="py-3 px-4 text-left">Feature</th>
+                    <th class="py-3 px-4 text-center">Basic</th>
+                    <th class="py-3 px-4 text-center">Standard</th>
+                    <th class="py-3 px-4 text-center">Premium</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-300 text-gray-700">
+                <tr>
+                    <td class="py-3 px-4">Invoices / Month</td>
+                    <td class="py-3 px-4 text-center">5</td>
+                    <td class="py-3 px-4 text-center">50</td>
+                    <td class="py-3 px-4 text-center">Unlimited</td>
+                </tr>
+                <tr>
+                    <td class="py-3 px-4">Customer Management</td>
+                    <td class="py-3 px-4 text-center">✔</td>
+                    <td class="py-3 px-4 text-center">✔</td>
+                    <td class="py-3 px-4 text-center">✔</td>
+                </tr>
+                <tr>
+                    <td class="py-3 px-4">Product Management</td>
+                    <td class="py-3 px-4 text-center">❌</td>
+                    <td class="py-3 px-4 text-center">✔</td>
+                    <td class="py-3 px-4 text-center">✔</td>
+                </tr>
+                <tr>
+                    <td class="py-3 px-4">Analytics</td>
+                    <td class="py-3 px-4 text-center">❌</td>
+                    <td class="py-3 px-4 text-center">❌</td>
+                    <td class="py-3 px-4 text-center">✔</td>
+                </tr>
+                <tr>
+                    <td class="py-3 px-4">Support</td>
+                    <td class="py-3 px-4 text-center">Email</td>
+                    <td class="py-3 px-4 text-center">Priority</td>
+                    <td class="py-3 px-4 text-center">Dedicated</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Testimonials Section -->
+    <div class="mt-16 text-center">
+        <h3 class="text-2xl font-bold mb-8">What our customers say</h3>
+        <div class="grid sm:grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white p-6 rounded-lg shadow text-gray-800">
+                <p>"InvoiceGen saves us hours every week! Highly recommend."</p>
+                <p class="mt-4 font-bold">– Ramesh K.</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow text-gray-800">
+                <p>"The Standard plan is perfect for our growing business."</p>
+                <p class="mt-4 font-bold">– Priya S.</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow text-gray-800">
+                <p>"Premium features make managing invoices effortless."</p>
+                <p class="mt-4 font-bold">– Anand M.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% comment %} <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice #{{ invoice.invoice_no }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.2/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        /* Minimal styling for PDF */
+        body { font-family: 'Inter', sans-serif; }
+        .table-auto th, .table-auto td { border: 1px solid #ccc; padding: 6px; }
+    </style>
+</head>
+<body class="p-6 bg-white">
+
+    <!-- Header / Logo -->
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            {% if invoice.logo %}
+                <img src="{{ invoice.logo.url }}" alt="Logo" class="h-16">
+            {% else %}
+                <div class="text-2xl font-bold text-blue-600">InvoiceGen</div>
+            {% endif %}
+        </div>
+        <div class="text-right">
+            <p class="font-semibold">Invoice #: {{ invoice.invoice_no }}</p>
+            <p>Date: {{ invoice.date }}</p>
+        </div>
+    </div>
+
+    <!-- Customer Info -->
+    <div class="mb-6">
+        <p class="font-semibold">Customer:</p>
+        <p>{{ invoice.customer.name }}</p>
+        {% if invoice.order_ref %}
+            <p>Order Ref / PO No: {{ invoice.order_ref }}</p>
+        {% endif %}
+        {% if invoice_type == 'hospital' %}
+            <p>Doctor: {{ invoice.doctor.name }}</p>
+            <p>Department: {{ invoice.department.name }}</p>
+        {% endif %}
+    </div>
+
+    <!-- Items Table -->
+    <div class="overflow-x-auto mb-4">
+        <table class="table-auto w-full border-collapse">
+            <thead>
+                <tr class="bg-gray-100">
+                    <th class="border px-2 py-1">Item / Service</th>
+                    <th class="border px-2 py-1">Qty</th>
+                    <th class="border px-2 py-1">Price</th>
+                    <th class="border px-2 py-1">Tax %</th>
+                    <th class="border px-2 py-1">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in invoice.items.all %}
+                <tr>
+                    <td class="border px-2 py-1">{{ item.name }}</td>
+                    <td class="border px-2 py-1 text-center">{{ item.qty }}</td>
+                    <td class="border px-2 py-1 text-right">₹{{ item.price }}</td>
+                    <td class="border px-2 py-1 text-center">{{ item.tax }}%</td>
+                    <td class="border px-2 py-1 text-right">₹{{ item.total }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Totals -->
+    <div class="text-right mt-4">
+        <p>Subtotal: ₹{{ invoice.subtotal }}</p>
+        <p>Tax: ₹{{ invoice.tax }}</p>
+        <p>Discount: ₹{{ invoice.discount }}</p>
+        <p class="font-bold text-lg">Grand Total: ₹{{ invoice.grand_total }}</p>
+    </div>
+
+</body>
+</html> {% endcomment %}

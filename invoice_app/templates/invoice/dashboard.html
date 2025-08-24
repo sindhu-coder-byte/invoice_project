@@ -1,0 +1,179 @@
+{% extends 'invoice/base.html' %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-regular-rounded/css/uicons-regular-rounded.css">
+
+<!-- HERO SECTION -->
+<section class="bg-gradient-to-r from-blue-50 via-white to-blue-50 py-16 mb-12 shadow-lg rounded-2xl border border-blue-100 overflow-hidden">
+  <div class="container mx-auto flex flex-col-reverse md:flex-row items-center justify-between px-6">
+    
+    <!-- Text Block -->
+    <div class="md:w-1/2 text-center md:text-left animate-fadeInUp">
+      <h1 class="text-5xl font-extrabold text-gray-800 mb-4 leading-tight">
+        Welcome to <span class="text-amber-500">InvoiceGen</span>
+      </h1>
+      <p class="text-gray-600 leading-relaxed max-w-lg mb-6">
+        Create, manage, and send professional invoices effortlessly. Tailored for businesses, freelancers, and teams who value speed and simplicity.
+      </p>
+      <div class="flex justify-center md:justify-start gap-4">
+        <a href="{% url 'create_invoice_type' 'shopping' %}" 
+           class="bg-amber-500 text-white px-6 py-3 rounded-xl shadow-lg hover:bg-amber-400 transition transform hover:-translate-y-1">
+          + Create Invoice
+        </a>
+        <a href="#features" 
+           class="bg-blue-500 text-white px-6 py-3 rounded-xl shadow-lg hover:bg-blue-400 transition transform hover:-translate-y-1">
+          Learn More
+        </a>
+      </div>
+    </div>
+
+    <!-- Illustration Block -->
+    <div class="md:w-1/2 mb-8 md:mb-0 flex justify-center animate-fadeInRight">
+      <img src="https://cdn-icons-png.flaticon.com/512/2534/2534203.png" 
+           alt="Invoice Illustration" 
+           class="w-80 h-auto drop-shadow-xl">
+    </div>
+
+  </div>
+</section>
+
+
+<!-- INVOICE TEMPLATES -->
+
+<section id="features" class="bg-gradient-to-r from-blue-50 to-indigo-50 shadow-md p-12 rounded-2xl mb-16 border border-gray-200">
+  <h2 class="text-4xl font-extrabold text-gray-800 text-center mb-12 tracking-tight">
+    Invoice Templates
+  </h2>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
+    <!-- Shopping -->
+    <a href="{% url 'create_invoice_type' 'shopping' %}" 
+       class="group border border-gray-200 rounded-2xl p-8 bg-white hover:shadow-2xl hover:border-blue-400 transition-all duration-300 ease-in-out transform hover:-translate-y-2">
+      <div class="flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 mb-4 group-hover:bg-blue-200 transition">
+        <i class="fi fi-rr-shopping-cart text-blue-600 text-3xl"></i>
+      </div>
+      <h3 class="font-semibold text-xl text-gray-900 mb-3">Shopping Invoices</h3>
+      <p class="text-gray-600 leading-relaxed">Create clean and professional invoices for your retail business with ease.</p>
+    </a>
+
+    <!-- Hospital -->
+    <a href="{% url 'create_invoice_type' 'hospital' %}" 
+       class="group border border-gray-200 rounded-2xl p-8 bg-white hover:shadow-2xl hover:border-blue-400 transition-all duration-300 ease-in-out transform hover:-translate-y-2">
+      <div class="flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4 group-hover:bg-green-200 transition">
+        <i class="fi fi-rr-hospital text-green-600 text-3xl"></i>
+      </div>
+      <h3 class="font-semibold text-xl text-gray-900 mb-3">Hospital Invoices</h3>
+      <p class="text-gray-600 leading-relaxed">Generate detailed invoices for medical services, treatments, and consultations.</p>
+    </a>
+
+    <!-- Stationery -->
+    <a href="{% url 'create_invoice_type' 'stationery' %}" 
+       class="group border border-gray-200 rounded-2xl p-8 bg-white hover:shadow-2xl hover:border-blue-400 transition-all duration-300 ease-in-out transform hover:-translate-y-2">
+      <div class="flex items-center justify-center w-16 h-16 rounded-full bg-yellow-100 mb-4 group-hover:bg-yellow-200 transition">
+        <i class="fi fi-rr-pencil text-yellow-600 text-3xl"></i>
+      </div>
+      <h3 class="font-semibold text-xl text-gray-900 mb-3">Stationery Invoices</h3>
+      <p class="text-gray-600 leading-relaxed">Quickly create invoices for stationery shops, schools, and office supplies.</p>
+    </a>
+  </div>
+</section>
+
+
+<!-- How It Works Section -->
+<section class="bg-gradient-to-r from-blue-50 via-white to-blue-50 shadow-lg p-12 rounded-2xl mb-16 border border-gray-200 relative overflow-hidden">
+  <h2 class="text-4xl font-extrabold text-gray-800 text-center mb-16 tracking-tight">
+    How It Works
+  </h2>
+
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center relative">
+    <!-- Timeline Line -->
+    <div class="hidden md:block absolute top-10 left-[12%] right-[12%] h-1 bg-gradient-to-r from-blue-300 via-blue-400 to-blue-500 rounded-full shadow-md animate-pulse"></div>
+
+    <!-- Step 1 -->
+    <div class="text-center md:w-1/4 relative z-10 mb-12 md:mb-0 group animate-fadeInUp">
+      <div class="w-20 h-20 flex items-center justify-center mx-auto mb-4 rounded-full bg-blue-100 border-4 border-blue-300 shadow-lg group-hover:scale-110 transition-transform duration-300">
+        <i class="fi fi-rr-user-add text-blue-600 text-3xl"></i>
+      </div>
+      <h3 class="font-semibold text-lg text-gray-800">Add Customer</h3>
+      <p class="text-gray-500">Enter your customer's details.</p>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="text-center md:w-1/4 relative z-10 mb-12 md:mb-0 group animate-fadeInUp delay-200">
+      <div class="w-20 h-20 flex items-center justify-center mx-auto mb-4 rounded-full bg-green-100 border-4 border-green-300 shadow-lg group-hover:scale-110 transition-transform duration-300">
+        <i class="fi fi-rr-box-open text-green-600 text-3xl"></i>
+      </div>
+      <h3 class="font-semibold text-lg text-gray-800">Add Products/Services</h3>
+      <p class="text-gray-500">List items or services provided.</p>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="text-center md:w-1/4 relative z-10 mb-12 md:mb-0 group animate-fadeInUp delay-300">
+      <div class="w-20 h-20 flex items-center justify-center mx-auto mb-4 rounded-full bg-yellow-100 border-4 border-yellow-300 shadow-lg group-hover:scale-110 transition-transform duration-300">
+        <i class="fi fi-rr-file-invoice-dollar text-yellow-600 text-3xl"></i>
+      </div>
+      <h3 class="font-semibold text-lg text-gray-800">Create Invoice</h3>
+      <p class="text-gray-500">Generate the invoice instantly.</p>
+    </div>
+
+    <!-- Step 4 -->
+    <div class="text-center md:w-1/4 relative z-10 group animate-fadeInUp delay-500">
+      <div class="w-20 h-20 flex items-center justify-center mx-auto mb-4 rounded-full bg-purple-100 border-4 border-purple-300 shadow-lg group-hover:scale-110 transition-transform duration-300">
+        <i class="fi fi-rr-paper-plane text-purple-600 text-3xl"></i>
+      </div>
+      <h3 class="font-semibold text-lg text-gray-800">Download / Email</h3>
+      <p class="text-gray-500">Download or send directly to clients.</p>
+    </div>
+  </div>
+</section>
+
+<!-- WHY CHOOSE US -->
+<section id="why-choose-us" class="relative bg-gradient-to-br from-white via-blue-50 to-white p-12 rounded-3xl shadow-lg mb-16 border border-gray-200">
+  <h2 class="text-4xl font-extrabold text-gray-900 text-center mb-12 tracking-tight">
+    Why Choose <span class="text-blue-600">InvoiceGen?</span>
+  </h2>
+  
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+    
+    <!-- Feature Card -->
+    <div class="group flex flex-col items-center text-center p-6 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-xl hover:border-blue-300 transition transform hover:-translate-y-2">
+      <div class="w-14 h-14 flex items-center justify-center rounded-full bg-blue-100 mb-4 group-hover:bg-blue-200 transition">
+        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="w-7 h-7" alt="UI Icon">
+      </div>
+      <h3 class="text-lg font-semibold text-gray-800 mb-2">Easy Interface</h3>
+      <p class="text-gray-600 text-sm">Simple, intuitive design that anyone can use without training.</p>
+    </div>
+
+    <!-- Feature Card -->
+    <div class="group flex flex-col items-center text-center p-6 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-xl hover:border-blue-300 transition transform hover:-translate-y-2">
+      <div class="w-14 h-14 flex items-center justify-center rounded-full bg-green-100 mb-4 group-hover:bg-green-200 transition">
+        <img src="https://cdn-icons-png.flaticon.com/512/3039/3039386.png" class="w-7 h-7" alt="Template Icon">
+      </div>
+      <h3 class="text-lg font-semibold text-gray-800 mb-2">Pro Templates</h3>
+      <p class="text-gray-600 text-sm">Choose from sleek, ready-to-use invoice templates.</p>
+    </div>
+
+    <!-- Feature Card -->
+    <div class="group flex flex-col items-center text-center p-6 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-xl hover:border-blue-300 transition transform hover:-translate-y-2">
+      <div class="w-14 h-14 flex items-center justify-center rounded-full bg-yellow-100 mb-4 group-hover:bg-yellow-200 transition">
+        <img src="https://cdn-icons-png.flaticon.com/512/1828/1828884.png" class="w-7 h-7" alt="Branding Icon">
+      </div>
+      <h3 class="text-lg font-semibold text-gray-800 mb-2">Custom Branding</h3>
+      <p class="text-gray-600 text-sm">Add your logo and colors for a professional look.</p>
+    </div>
+
+    <!-- Feature Card -->
+    <div class="group flex flex-col items-center text-center p-6 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-xl hover:border-blue-300 transition transform hover:-translate-y-2">
+      <div class="w-14 h-14 flex items-center justify-center rounded-full bg-red-100 mb-4 group-hover:bg-red-200 transition">
+        <img src="https://cdn-icons-png.flaticon.com/512/2910/2910768.png" class="w-7 h-7" alt="Save Time Icon">
+      </div>
+      <h3 class="text-lg font-semibold text-gray-800 mb-2">Save Time</h3>
+      <p class="text-gray-600 text-sm">Automate billing and save valuable hours of work.</p>
+    </div>
+    
+  </div>
+</section>
+
+
+{% endblock %}

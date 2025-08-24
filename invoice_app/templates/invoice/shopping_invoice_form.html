@@ -1,0 +1,402 @@
+{% extends 'invoice/base.html' %}
+{% block title %}Shopping Invoice{% endblock %}
+
+{% block content %}
+<h2 class="text-2xl font-bold mb-6 text-gray-800">Create Shopping Invoice</h2>
+
+<form id="shopping-invoice-form" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <div class="flex flex-col md:flex-row justify-between items-center mb-4">
+        <!-- Logo Upload -->
+        <div class="mb-4 md:mb-0">
+            <label class="block text-gray-700 font-semibold mb-1">Upload Company Logo</label>
+            <div id="dropbox" class="border-2 border-dashed border-gray-400 p-4 text-center cursor-pointer bg-white hover:bg-gray-50">
+                Drag & Drop or Click to Upload
+                <input type="file" name="logo" accept="image/*" class="hidden" required>
+            </div>
+            <img id="preview-logo" class="mt-2 h-16 mx-auto hidden" />
+        </div>
+
+        <!-- Invoice Info -->
+        <div class="flex flex-col space-y-2 text-gray-700">
+            <div>Invoice No: <input type="text" name="invoice_no" value="SHOP-001" class="border rounded px-2 py-1 w-32 bg-white" required></div>
+            <div>Date: <input type="date" name="date" class="border rounded px-2 py-1 bg-white" required></div>
+            <div>Due Date: <input type="date" name="due_date" class="border rounded px-2 py-1 bg-white" required></div>
+            <div>Payment Terms: 
+                <select name="payment_terms" class="border rounded px-2 py-1 bg-white">
+                    <option value="Due on Receipt">Due on Receipt</option>
+                    <option value="Net 7">Net 7</option>
+                    <option value="Net 15">Net 15</option>
+                    <option value="Net 30">Net 30</option>
+                </select>
+            </div>
+            <div>
+                Currency:
+                <select id="currency" name="currency" class="border rounded px-2 py-1 bg-white">
+                    <option value="₹">₹ - INR</option>
+                    <option value="$">$ - USD</option>
+                    <option value="€">€ - EUR</option>
+                    <option value="£">£ - GBP</option>
+                    <option value="¥">¥ - JPY</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Company Details -->
+    <div class="mb-4">
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">Company Details</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1">Company Name</label>
+                <input type="text" name="company_name" class="border rounded px-2 py-1 w-64 bg-white" required>
+            </div>
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1">Address</label>
+                <input type="text" name="company_address" class="border rounded px-2 py-1 w-64 bg-white" required>
+            </div>
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1">Phone</label>
+                <input type="text" name="company_phone" class="border rounded px-2 py-1 w-64 bg-white" required>
+            </div>
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1">Email</label>
+                <input type="email" name="company_email" class="border rounded px-2 py-1 w-64 bg-white" required>
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-gray-700 font-semibold mb-1">Bank Details</label>
+                <textarea name="company_bank" placeholder="Bank Name, Account No, IFSC, Branch" class="border rounded px-2 py-1 w-full bg-white"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Details -->
+    <div class="mb-4">
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">Customer Details</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1">Customer Name</label>
+                <input type="text" name="customer_name" class="border rounded px-2 py-1 w-64 bg-white" required>
+            </div>
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1">Customer Email</label>
+                <input type="email" name="customer_email" class="border rounded px-2 py-1 w-64 bg-white">
+            </div>
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1">Customer Phone</label>
+                <input type="text" name="customer_phone" class="border rounded px-2 py-1 w-64 bg-white" required>
+            </div>
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1">Customer Address</label>
+                <input type="text" name="customer_address" class="border rounded px-2 py-1 w-64 bg-white" required>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products Table -->
+    <h3 class="text-lg font-semibold mb-2 text-gray-800">Products / Items</h3>
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white rounded shadow-md">
+            <thead class="bg-gray-200">
+                <tr>
+                    <th class="px-4 py-2 text-left">Item Name</th>
+                    <th class="px-4 py-2">Qty</th>
+                    <th class="px-4 py-2">Price</th>
+                    <th class="px-4 py-2">Tax</th>
+                    <th class="px-4 py-2">Total</th>
+                    <th class="px-4 py-2">Action</th>
+                </tr>
+            </thead>
+            <tbody id="items-body"></tbody>
+        </table>
+    </div>
+    <div class="mt-2 flex justify-start gap-2">
+        <button type="button" class="bg-amber-500 text-white px-3 py-1 rounded hover:bg-amber-400" onclick="addItemRow()">+ Add Item</button>
+    </div>
+
+    <!-- Totals -->
+    <div class="mt-6 bg-white p-4 rounded shadow-md max-w-md space-y-2">
+        <div class="flex justify-between"><span>Subtotal:</span><span id="subtotal">₹0</span></div>
+        <div class="flex justify-between"><span>Tax:</span><span id="tax-total">₹0</span></div>
+        <div class="flex justify-between items-center">
+            <span>Discount (%):</span>
+            <input type="number" id="discount" value="0" class="border rounded px-2 py-1 w-24 bg-white" oninput="updateTotals()">
+        </div>
+        <div class="flex justify-between font-bold text-gray-800 text-lg border-t pt-2">
+            <span>GRAND TOTAL:</span><span id="grand-total">₹0</span>
+        </div>
+    </div>
+
+    <!-- Notes & Terms -->
+    <div class="mt-6">
+        <h3 class="text-lg font-semibold mb-2 text-gray-800">Additional Info</h3>
+        <textarea name="notes" placeholder="Enter special notes (e.g., Thank you for your business)" class="border rounded px-2 py-1 w-full mb-2 bg-white"></textarea>
+        <textarea name="terms" placeholder="Enter terms & conditions (e.g., Goods once sold cannot be returned)" class="border rounded px-2 py-1 w-full bg-white"></textarea>
+    </div>
+
+    <!-- Authorized Signature -->
+    <div class="mt-6 flex justify-end items-center">
+        <div class="text-center">
+            <p class="font-semibold">Authorized Signatory</p>
+            <p class="text-sm text-gray-600">(Sign & Stamp)</p>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="mt-4 flex gap-2">
+        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-500">Save Invoice</button>
+        <button type="button" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500" onclick="previewInvoice()">Preview</button>
+        <button type="button" class="bg-amber-500 text-white px-4 py-2 rounded hover:bg-amber-400" onclick="downloadPDF()">Download PDF</button>
+    </div>
+</form>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+<script>
+// ==================== Logo Dropbox ====================
+let logoDataURL = '';
+const dropbox = document.getElementById('dropbox');
+const fileInput = dropbox.querySelector('input[type="file"]');
+const previewLogo = document.getElementById('preview-logo');
+
+dropbox.addEventListener('click', () => fileInput.click());
+dropbox.addEventListener('dragover', e => { e.preventDefault(); dropbox.classList.add('border-blue-500'); });
+dropbox.addEventListener('dragleave', e => { e.preventDefault(); dropbox.classList.remove('border-blue-500'); });
+dropbox.addEventListener('drop', e => {
+    e.preventDefault(); dropbox.classList.remove('border-blue-500');
+    const file = e.dataTransfer.files[0]; fileInput.files = e.dataTransfer.files;
+    if(file){
+        const reader = new FileReader();
+        reader.onload = e => { logoDataURL = e.target.result; previewLogo.src = logoDataURL; previewLogo.classList.remove('hidden'); };
+        reader.readAsDataURL(file);
+    }
+});
+fileInput.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if(file){
+        const reader = new FileReader();
+        reader.onload = e => { logoDataURL = e.target.result; previewLogo.src = logoDataURL; previewLogo.classList.remove('hidden'); };
+        reader.readAsDataURL(file);
+    }
+});
+
+// ==================== Products ====================
+const itemsList = [
+    { name: 'Cashew Nuts', price: 300, tax: 5 },
+    { name: 'Tea', price: 120, tax: 5 },
+    { name: 'Almonds', price: 450 , tax: 12 },
+    { name: 'Sugar', price: 300, tax: 5 },
+    { name: 'Ghee', price: 250, tax: 12 },
+];
+
+// ==================== Currency Helper ====================
+function getCurrency() {
+    const select = document.getElementById('currency');
+    return select ? select.value : '₹';
+}
+
+// Update totals whenever currency changes
+document.getElementById('currency').addEventListener('change', updateTotals);
+
+// ==================== Items Table ====================
+function addItemRow() {
+    const tbody = document.getElementById('items-body');
+    const row = document.createElement('tr'); 
+    row.classList.add('border-b');
+    const currency = getCurrency();
+    row.innerHTML = `
+        <td class="px-4 py-2">
+            <select class="item-select border rounded px-2 py-1 w-full" onchange="updateRow(this)" required>
+                <option value="">Select Item</option>
+                ${itemsList.map((item,i)=>`<option value="${i}">${item.name}</option>`).join('')}
+            </select>
+        </td>
+        <td class="px-4 py-2"><input type="number" min="1" value="1" class="qty-input border rounded px-2 py-1 w-20" oninput="updateRow(this)" required></td>
+        <td class="px-4 py-2 price-cell">${currency}0.00</td>
+        <td class="px-4 py-2 tax-cell">0%</td>
+        <td class="px-4 py-2 total-cell">${currency}0.00</td>
+        <td class="px-4 py-2 text-center"><button type="button" class="text-red-600 hover:text-red-500" onclick="removeRow(this)">Remove</button></td>
+    `;
+    tbody.appendChild(row);
+    updateRow(row.querySelector('.item-select'));
+}
+
+function removeRow(button){ 
+    button.closest('tr').remove(); 
+    updateTotals(); 
+}
+
+function updateRow(element){
+    const row = element.closest('tr');
+    const select = row.querySelector('.item-select');
+    const qtyInput = row.querySelector('.qty-input');
+    const priceCell = row.querySelector('.price-cell');
+    const taxCell = row.querySelector('.tax-cell');
+    const totalCell = row.querySelector('.total-cell');
+    const currency = getCurrency();
+
+    if(select.value===""){ 
+        priceCell.innerText=`${currency}0.00`; 
+        taxCell.innerText="0%"; 
+        totalCell.innerText=`${currency}0.00`; 
+        updateTotals(); return; 
+    }
+    const item = itemsList[select.value]; 
+    const qty = parseInt(qtyInput.value)||0;
+    const total = qty * item.price * (1 + item.tax/100);
+    priceCell.innerText = `${currency}${item.price.toFixed(2)}`; 
+    taxCell.innerText = `${item.tax}%`; 
+    totalCell.innerText = `${currency}${total.toFixed(2)}`;
+    updateTotals();
+}
+
+function updateTotals(){
+    const rows = document.querySelectorAll('#items-body tr'); 
+    let subtotal=0, taxTotal=0;
+    rows.forEach(row=>{
+        const select=row.querySelector('.item-select'); 
+        if(select.value==="") return;
+        const item=itemsList[select.value]; 
+        const qty=parseInt(row.querySelector('.qty-input').value)||0;
+        subtotal += qty * item.price; 
+        taxTotal += qty * item.price * item.tax/100;
+    });
+    const discountPercent=parseFloat(document.getElementById('discount').value)||0;
+    const discountAmount=subtotal*discountPercent/100;
+    const currency = getCurrency();
+    document.getElementById('subtotal').innerText=`${currency}${subtotal.toFixed(2)}`;
+    document.getElementById('tax-total').innerText=`${currency}${taxTotal.toFixed(2)}`;
+    document.getElementById('grand-total').innerText=`${currency}${(subtotal+taxTotal-discountAmount).toFixed(2)}`;
+}
+
+// ==================== Save Invoice ====================
+document.getElementById('shopping-invoice-form').addEventListener('submit', function(e){
+    e.preventDefault();
+    updateTotals(); 
+    const form = e.target;
+    const formData = new FormData(form);
+    const currency = getCurrency();
+
+    const invoice = {
+        logo: logoDataURL,
+        currency: currency,
+        company_name: formData.get('company_name'),
+        company_address: formData.get('company_address'),
+        company_phone: formData.get('company_phone'),
+        company_email: formData.get('company_email'),
+        company_bank: formData.get('company_bank'),
+        customer_name: formData.get('customer_name'),
+        customer_email: formData.get('customer_email'),
+        customer_phone: formData.get('customer_phone'),
+        customer_address: formData.get('customer_address'),
+        invoice_no: formData.get('invoice_no'),
+        date: formData.get('date'),
+        due_date: formData.get('due_date'),
+        payment_terms: formData.get('payment_terms'),
+        discountPercent: parseFloat(formData.get('discount')) || 0,
+        items: [],
+        notes: formData.get('notes'),
+        terms: formData.get('terms'),
+        subtotal: parseFloat(document.getElementById('subtotal').innerText.replace(currency,'')),
+        tax: parseFloat(document.getElementById('tax-total').innerText.replace(currency,'')),
+        grandTotal: parseFloat(document.getElementById('grand-total').innerText.replace(currency,''))
+    };
+
+    document.querySelectorAll('#items-body tr').forEach(row=>{
+        const select=row.querySelector('.item-select'); 
+        if(select.value==="") return;
+        const item=itemsList[select.value]; 
+        const qty=parseInt(row.querySelector('.qty-input').value)||0;
+        const total = qty*item.price*(1+item.tax/100);
+        invoice.items.push({ name:item.name, price:item.price, tax:item.tax, qty, total });
+    });
+
+    invoice.discountAmount = invoice.subtotal * invoice.discountPercent/100;
+    localStorage.setItem('savedInvoice', JSON.stringify(invoice));
+    setTimeout(()=>{ alert('Invoice saved successfully!'); }, 50); 
+});
+
+// ==================== Preview & Download PDF ====================
+function previewInvoice() {
+    const invoice = JSON.parse(localStorage.getItem('savedInvoice'));
+    if (!invoice) { alert("No saved invoice!"); return; }
+    const doc = generatePDF(invoice);
+    window.open(doc.output('bloburl'));
+}
+
+function downloadPDF() {
+    const invoice = JSON.parse(localStorage.getItem('savedInvoice'));
+    if (!invoice) { alert("No saved invoice!"); return; }
+    const doc = generatePDF(invoice);
+    doc.save(`Invoice_${invoice.customer_name}.pdf`);
+}
+
+// ==================== PDF Generator ====================
+function generatePDF(invoice) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const margin = 15;
+    let y = margin;
+    const currency = invoice.currency || '₹';
+
+    if(invoice.logo){
+        try { doc.addImage(invoice.logo, 'PNG', margin, y, 30, 30); } 
+        catch(e){ console.error(e); }
+    }
+    y += 35;
+
+    // Invoice Info
+    doc.setFontSize(12); doc.setFont("helvetica", "bold");
+    doc.text(`Invoice #${invoice.invoice_no}`, 140, 25);
+    doc.setFontSize(10); doc.setFont("helvetica", "normal");
+    doc.text(`Date: ${invoice.date}`, 140, 32);
+    doc.text(`Due Date: ${invoice.due_date}`, 140, 38);
+    doc.text(`Payment Terms: ${invoice.payment_terms}`, 140, 44);
+
+    // Bill From / To
+    y += 10;
+    doc.setFontSize(10); doc.setFont("helvetica", "bold");
+    doc.text("Bill From:", margin, y); 
+    doc.text("Bill To:", 110, y); y += 6;
+    doc.setFont("helvetica", "normal");
+    doc.text(invoice.company_name, margin, y); 
+    doc.text(invoice.customer_name, 110, y); y += 6;
+    doc.text(invoice.company_address, margin, y); 
+    doc.text(invoice.customer_address, 110, y); y += 6;
+    doc.text(`Phone: ${invoice.company_phone} | Email: ${invoice.company_email}`, margin, y);
+    doc.text(`Phone: ${invoice.customer_phone} | Email: ${invoice.customer_email}`, 110, y); 
+    y += 10;
+
+    const itemTableData = invoice.items.map(item => [
+        item.name,
+        item.qty,
+        `${currency}${Number(item.price).toFixed(2)}`,
+        `${Number(item.tax).toFixed(0)}%`,
+        `${currency}${Number(item.total).toFixed(2)}`
+    ]);
+
+    doc.autoTable({ startY: y, head: [['Item','Qty','Price','Tax','Total']], body: itemTableData, theme: 'grid', margin: { left: margin, right: margin } });
+    const finalY = doc.lastAutoTable.finalY + 5;
+
+    // Totals
+    doc.setFont("helvetica", "bold");
+    doc.text(`Subtotal: ${currency}${invoice.subtotal.toFixed(2)}`, 140, finalY);
+    doc.text(`Tax: ${currency}${invoice.tax.toFixed(2)}`, 140, finalY+6);
+    doc.text(`Discount: ${currency}${invoice.discountAmount.toFixed(2)}`, 140, finalY+12);
+    doc.text(`GRAND TOTAL: ${currency}${invoice.grandTotal.toFixed(2)}`, 140, finalY+18);
+
+    // Notes & Terms
+    doc.setFont("helvetica", "normal");
+    doc.text(`Notes: ${invoice.notes || ""}`, margin, finalY+28);
+    doc.text(`Terms: ${invoice.terms || ""}`, margin, finalY+36);
+
+    return doc;
+}
+</script>
+
+
+
+
+{% endblock %}

@@ -1,0 +1,274 @@
+{% extends 'invoice/base.html' %}
+{% block title %}Stationery Invoice{% endblock %}
+
+{% block content %}
+<h2 class="text-2xl font-bold mb-4">Create Stationery Invoice</h2>
+
+<form id="stationery-invoice-form" class="space-y-4 bg-white p-6 rounded shadow-md">
+    {% csrf_token %}
+
+    <!-- ==================== Logo & Shop Info ==================== -->
+    <div class="flex space-x-6 items-center mb-4">
+        <div id="dropbox" class="border-2 border-dashed border-gray-400 p-4 w-32 h-32 flex items-center justify-center cursor-pointer">
+            <input type="file" class="hidden" accept="image/*">
+            <span>Upload Logo</span>
+        </div>
+        <img id="preview-logo" class="hidden w-32 h-32 object-contain" alt="Shop Logo">
+        <div class="flex-1 space-y-2">
+            <label>Shop Name</label>
+            <input type="text" name="shop_name" class="border p-2 w-64" placeholder="Enter Shop Name" required>
+
+            <label>Address</label>
+            <textarea name="shop_address" class="border p-2 w-64" placeholder="Enter Address" required></textarea>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label>Contact Number</label>
+                    <input type="text" name="shop_contact" class="border p-2 w-full" placeholder="Enter Contact">
+                </div>
+                <div>
+                    <label>Email</label>
+                    <input type="email" name="shop_email" class="border p-2 w-full" placeholder="Enter Email">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== Customer Info ==================== -->
+    <div class="space-y-2">
+        <h2 class="font-bold text-lg">Customer Information</h2>
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label>Customer Name</label>
+                <input type="text" name="customer_name" class="border p-2 w-full" placeholder="Enter Customer Name" required>
+            </div>
+            <div>
+                <label>Customer Contact</label>
+                <input type="text" name="customer_contact" class="border p-2 w-full" placeholder="Enter Contact">
+            </div>
+        </div>
+        <label>Customer Address</label>
+        <textarea name="customer_address" class="border p-2 w-full" placeholder="Enter Address"></textarea>
+    </div>
+
+    <!-- ==================== Invoice Metadata ==================== -->
+    <div class="grid grid-cols-2 gap-4">
+        <div>
+            <label>Invoice Number</label>
+            <input type="text" name="invoice_no" class="border p-2 w-full" readonly value="ST-INV-001">
+        </div>
+        <div>
+            <label>Invoice Date</label>
+            <input type="date" name="invoice_date" class="border p-2 w-full" required>
+        </div>
+    </div>
+
+    <!-- ==================== Products Table ==================== -->
+    <div>
+        <h2 class="font-bold text-lg mb-2">Products</h2>
+        <table class="w-full border-collapse border">
+            <thead class="bg-gray-200">
+                <tr>
+                    <th class="border px-2 py-1">Product Name</th>
+                    <th class="border px-2 py-1">Quantity</th>
+                    <th class="border px-2 py-1">Unit Price</th>
+                    <th class="border px-2 py-1">Discount</th>
+                    <th class="border px-2 py-1">Tax %</th>
+                    <th class="border px-2 py-1">Total</th>
+                    <th class="border px-2 py-1">Action</th>
+                </tr>
+            </thead>
+            <tbody id="products-body">
+                <!-- JS will dynamically add rows -->
+            </tbody>
+        </table>
+        <button type="button" onclick="addProductRow()" class="mt-2 px-4 py-2 bg-blue-600 text-white rounded">Add Product</button>
+    </div>
+
+    <!-- ==================== Summary Section ==================== -->
+    <div class="grid grid-cols-2 gap-4 mt-4">
+        <div></div>
+        <div class="space-y-2">
+            <div class="flex justify-between">
+                <span>Subtotal</span><span id="subtotal">₹0.00</span>
+            </div>
+            <div class="flex justify-between">
+                <span>Discount</span><span id="discount-amount">₹0.00</span>
+            </div>
+            <div class="flex justify-between">
+                <span>Tax</span><span id="tax-total">₹0.00</span>
+            </div>
+            <div class="flex justify-between font-bold">
+                <span>Grand Total</span><span id="grand-total">₹0.00</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== Payment Details ==================== -->
+    <div class="space-y-2 mt-4">
+        <h2 class="font-bold text-lg">Payment Details</h2>
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label>Payment Method</label>
+                <select name="payment_method" class="border p-2 w-full">
+                    <option value="">Select</option>
+                    <option value="Cash">Cash</option>
+                    <option value="Card">Card</option>
+                    <option value="Online">Online</option>
+                </select>
+            </div>
+            <div>
+                <label>Advance Payment</label>
+                <input type="number" name="advance_payment" class="border p-2 w-full" placeholder="Enter Advance">
+            </div>
+        </div>
+        <div>
+            <label>Balance Due</label>
+            <input type="number" name="balance_due" class="border p-2 w-full" readonly>
+        </div>
+    </div>
+
+    <!-- ==================== Notes ==================== -->
+    <div class="space-y-2 mt-4">
+        <label>Notes / Thank You</label>
+        <textarea name="notes" class="border p-2 w-full" placeholder="Thank you for your purchase!"></textarea>
+    </div>
+
+    <div class="flex space-x-4 mt-4">
+        <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded">Save Invoice</button>
+        <button type="button" onclick="previewInvoice()" class="px-4 py-2 bg-blue-600 text-white rounded">Preview PDF</button>
+        <button type="button" onclick="downloadPDF()" class="px-4 py-2 bg-yellow-600 text-white rounded">Download PDF</button>
+    </div>
+</form>
+
+<script>
+// ==================== Products & Calculation ====================
+function addProductRow(name='', qty=1, rate=0, discount=0, tax=0){
+    const tbody = document.getElementById("products-body");
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+        <td class="border px-2 py-1"><input type="text" value="${name}" placeholder="Product Name" class="border p-1 w-full product-name" onchange="updateTotals()"></td>
+        <td class="border px-2 py-1"><input type="number" value="${qty}" min="1" class="border p-1 w-16 qty" onchange="updateTotals()"></td>
+        <td class="border px-2 py-1"><input type="number" value="${rate}" min="0" class="border p-1 w-20 rate" onchange="updateTotals()"></td>
+        <td class="border px-2 py-1"><input type="number" value="${discount}" min="0" class="border p-1 w-20 discount" onchange="updateTotals()"></td>
+        <td class="border px-2 py-1"><input type="number" value="${tax}" min="0" class="border p-1 w-16 tax" onchange="updateTotals()"></td>
+        <td class="border px-2 py-1 total">₹0.00</td>
+        <td class="border px-2 py-1 text-center"><button type="button" onclick="removeRow(this)" class="text-red-600">Remove</button></td>
+    `;
+    tbody.appendChild(tr);
+    updateTotals();
+}
+
+function removeRow(button){
+    button.closest("tr").remove();
+    updateTotals();
+}
+
+function updateTotals(){
+    let subtotal=0, discountTotal=0, taxTotal=0;
+    document.querySelectorAll("#products-body tr").forEach(tr=>{
+        const qty=parseFloat(tr.querySelector(".qty").value)||0;
+        const rate=parseFloat(tr.querySelector(".rate").value)||0;
+        const discount=parseFloat(tr.querySelector(".discount").value)||0;
+        const tax=parseFloat(tr.querySelector(".tax").value)||0;
+
+        const total=(qty*rate-discount)+((qty*rate-discount)*tax/100);
+        tr.querySelector(".total").innerText=`₹${total.toFixed(2)}`;
+
+        subtotal+=qty*rate;
+        discountTotal+=discount;
+        taxTotal+=(qty*rate-discount)*tax/100;
+    });
+    const grandTotal=subtotal+taxTotal-discountTotal;
+    document.getElementById("subtotal").innerText=`₹${subtotal.toFixed(2)}`;
+    document.getElementById("discount-amount").innerText=`₹${discountTotal.toFixed(2)}`;
+    document.getElementById("tax-total").innerText=`₹${taxTotal.toFixed(2)}`;
+    document.getElementById("grand-total").innerText=`₹${grandTotal.toFixed(2)}`;
+
+    const advance=parseFloat(document.querySelector('[name="advance_payment"]').value)||0;
+    document.querySelector('[name="balance_due"]').value=(grandTotal-advance).toFixed(2);
+}
+document.querySelector('[name="advance_payment"]').addEventListener("input",updateTotals);
+
+// ==================== Logo Upload ====================
+const dropbox=document.getElementById('dropbox');
+const previewLogo=document.getElementById('preview-logo');
+dropbox.addEventListener('click',()=>dropbox.querySelector('input').click());
+dropbox.querySelector('input').addEventListener('change',function(){
+    const file=this.files[0];
+    if(file){
+        const reader=new FileReader();
+        reader.onload=e=>{
+            previewLogo.src=e.target.result;
+            previewLogo.classList.remove('hidden');
+        }
+        reader.readAsDataURL(file);
+    }
+});
+
+// ==================== PDF Generation ====================
+function downloadPDF(){
+    const { jsPDF }=window.jspdf;
+    const doc=new jsPDF('p','pt','a4');
+
+    // Bill From
+    const shopName=document.querySelector('[name="shop_name"]').value;
+    const shopAddress=document.querySelector('[name="shop_address"]').value;
+    const shopContact=document.querySelector('[name="shop_contact"]').value;
+    const shopEmail=document.querySelector('[name="shop_email"]').value;
+
+    doc.setFontSize(14); doc.text("Bill From:",40,40);
+    doc.setFontSize(12);
+    doc.text(`${shopName}`,40,60);
+    doc.text(`${shopAddress}`,40,75);
+    doc.text(`Contact: ${shopContact}`,40,90);
+    doc.text(`Email: ${shopEmail}`,40,105);
+
+    // Bill To
+    const customerName=document.querySelector('[name="customer_name"]').value;
+    const customerContact=document.querySelector('[name="customer_contact"]').value;
+    const invoiceNo=document.querySelector('[name="invoice_no"]').value;
+    const invoiceDate=document.querySelector('[name="invoice_date"]').value;
+
+    doc.setFontSize(14); doc.text("Bill To:",300,40);
+    doc.setFontSize(12);
+    doc.text(`Name: ${customerName}`,300,60);
+    doc.text(`Contact: ${customerContact}`,300,75);
+    doc.text(`Invoice No: ${invoiceNo}`,300,90);
+    doc.text(`Invoice Date: ${invoiceDate}`,300,105);
+
+    // Items Table
+    doc.autoTable({html:'#products-body',startY:130,theme:'grid'});
+
+    // Totals
+    const subtotal=document.getElementById("subtotal").innerText;
+    const discount=document.getElementById("discount-amount").innerText;
+    const tax=document.getElementById("tax-total").innerText;
+    const grandTotal=document.getElementById("grand-total").innerText;
+    const advance=parseFloat(document.querySelector('[name="advance_payment"]').value)||0;
+    const balance=parseFloat(document.querySelector('[name="balance_due"]').value)||0;
+
+    doc.text(`Subtotal: ${subtotal}`,400,doc.lastAutoTable.finalY+20);
+    doc.text(`Discount: ${discount}`,400,doc.lastAutoTable.finalY+35);
+    doc.text(`Tax: ${tax}`,400,doc.lastAutoTable.finalY+50);
+    doc.text(`Grand Total: ${grandTotal}`,400,doc.lastAutoTable.finalY+65);
+    doc.text(`Advance Payment: ₹${advance.toFixed(2)}`,400,doc.lastAutoTable.finalY+80);
+    doc.text(`Balance Due: ₹${balance.toFixed(2)}`,400,doc.lastAutoTable.finalY+95);
+
+    const notes=document.querySelector('[name="notes"]').value;
+    doc.text(`Notes: ${notes}`,40,doc.lastAutoTable.finalY+120);
+
+    if(previewLogo.src){doc.addImage(previewLogo.src,'PNG',450,20,100,50);}
+    doc.save("stationery_invoice.pdf");
+}
+
+// Form submission
+document.getElementById("stationery-invoice-form").addEventListener("submit",function(e){
+    e.preventDefault();
+    alert("Invoice saved! You can preview or download PDF.");
+});
+
+// Initialize first product row
+addProductRow();
+</script>
+{% endblock %}

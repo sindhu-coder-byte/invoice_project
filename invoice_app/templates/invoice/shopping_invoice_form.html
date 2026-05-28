@@ -464,13 +464,29 @@ function imgType(url) {
     return m[1].toUpperCase() === 'JPG' ? 'JPEG' : m[1].toUpperCase();
 }
 
+/**
+ * jsPDF built-in fonts (helvetica/times/courier) use Latin-1 / cp1252 encoding.
+ * The Rupee sign ₹ (U+20B9) is NOT in this range and renders as garbage.
+ * Dollar $, Pound £, Yen ¥ ARE in Latin-1 and render fine.
+ * Euro € (U+20AC) is in cp1252 (byte 0x80) and also renders fine.
+ */
+function pdfCur(c) {
+    return c === '₹' ? 'Rs.' : c;
+}
+
+/** Format a monetary value as a clean string for jsPDF text output */
+function pdfMoney(amount, cur) {
+    return pdfCur(cur) + ' ' + Number(amount).toFixed(2);
+}
+
 function buildPDF(d, tpl) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF('p','pt','a4');
     const W = doc.internal.pageSize.getWidth();
     const H = doc.internal.pageSize.getHeight();
     const M = 36;
-    const cur = d.currency;
+    // Use PDF-safe currency symbol (₹ → Rs., others unchanged)
+    const cur = pdfCur(d.currency);
 
     /* ── CLASSIC ─────────────────────────────── */
     if (tpl === 'classic') {

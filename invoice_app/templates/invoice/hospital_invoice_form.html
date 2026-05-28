@@ -363,6 +363,8 @@ function buildHospitalPDF(d) {
     const W = doc.internal.pageSize.getWidth();
     const H = doc.internal.pageSize.getHeight();
     const M = 36;
+    // jsPDF Latin-1 fonts cannot render ₹ (U+20B9) — use 'Rs.' throughout
+    const Rs = 'Rs.';
 
     // ── HEADER (teal) ──────────────────────────
     doc.setFillColor(13,148,136);   // teal-600
@@ -447,8 +449,8 @@ function buildHospitalPDF(d) {
 
     // ── SERVICES TABLE ─────────────────────────
     doc.autoTable({
-        head: [['#','Service / Item','Qty','Rate (₹)','Total (₹)']],
-        body: d.items.map((it,i) => [i+1, it.name, it.qty, `₹${it.rate.toFixed(2)}`, `₹${it.total.toFixed(2)}`]),
+        head: [['#','Service / Item','Qty',`Rate (${Rs})`,`Total (${Rs})`]],
+        body: d.items.map((it,i) => [i+1, it.name, it.qty, `${Rs} ${it.rate.toFixed(2)}`, `${Rs} ${it.total.toFixed(2)}`]),
         startY: y,
         styles: { fontSize:9.5, cellPadding:7 },
         headStyles: { fillColor:[13,148,136], textColor:255, fontStyle:'bold' },
@@ -464,7 +466,7 @@ function buildHospitalPDF(d) {
     doc.roundedRect(W-M-200, gy, 200, 32, 6,6,'F');
     doc.setFontSize(12); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
     doc.text('GRAND TOTAL', W-M-190, gy+19);
-    doc.text(`₹${d.grandTotal.toFixed(2)}`, W-M-10, gy+19, {align:'right'});
+    doc.text(`${Rs} ${d.grandTotal.toFixed(2)}`, W-M-10, gy+19, {align:'right'});
 
     // Payment details
     gy += 42;
@@ -474,7 +476,7 @@ function buildHospitalPDF(d) {
     doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(161,98,7);
     doc.text('PAYMENT DETAILS', M+10, gy+12);
     doc.setFont('helvetica','normal'); doc.setTextColor(107,114,128);
-    doc.text(`Method: ${d.payment_method||'—'}   |   Insurance: ${d.insurance_provider||'N/A'}   |   Advance: ₹${d.advance.toFixed(2)}   |   Balance Due: ₹${d.balance.toFixed(2)}`, M+10, gy+26);
+    doc.text(`Method: ${d.payment_method||'—'}   |   Insurance: ${d.insurance_provider||'N/A'}   |   Advance: ${Rs} ${d.advance.toFixed(2)}   |   Balance Due: ${Rs} ${d.balance.toFixed(2)}`, M+10, gy+26);
 
     // Notes
     if (d.notes || d.terms) {

@@ -374,6 +374,8 @@ function imgType(url) {
 function buildStationeryPDF(d, tpl) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF('p','pt','a4');
+    // jsPDF Latin-1 fonts cannot render ₹ (U+20B9) — use 'Rs.' throughout PDF output
+    const Rs = 'Rs.';
     const W = doc.internal.pageSize.getWidth();
     const H = doc.internal.pageSize.getHeight();
     const M = 36;
@@ -411,7 +413,7 @@ function buildStationeryPDF(d, tpl) {
 
         doc.autoTable({
             head: [['#','Product','Qty','Price','Disc.','Tax','Total']],
-            body: d.items.map((it,i)=>[i+1, it.name, it.qty, `₹${it.price.toFixed(2)}`, `₹${it.discount.toFixed(2)}`, `${it.tax}%`, `₹${it.total.toFixed(2)}`]),
+            body: d.items.map((it,i)=>[i+1, it.name, it.qty, `${Rs} ${it.price.toFixed(2)}`, `${Rs} ${it.discount.toFixed(2)}`, `${it.tax}%`, `${Rs} ${it.total.toFixed(2)}`]),
             startY: y,
             styles: { fontSize:9.5, cellPadding:6.5 },
             headStyles: { fillColor:[245,158,11], textColor:255, fontStyle:'bold' },
@@ -425,9 +427,9 @@ function buildStationeryPDF(d, tpl) {
         doc.roundedRect(W-M-200, gy, 200, 30, 6,6,'F');
         doc.setFontSize(12); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
         doc.text('TOTAL', W-M-190, gy+19);
-        doc.text(`₹${d.grandTotal.toFixed(2)}`, W-M-10, gy+19, {align:'right'});
+        doc.text(`${Rs} ${d.grandTotal.toFixed(2)}`, W-M-10, gy+19, {align:'right'});
         doc.setFontSize(7.5); doc.setFont('helvetica','normal'); doc.setTextColor(161,98,7);
-        doc.text(`Sub: ₹${d.subtotal.toFixed(2)}  Disc: ₹${d.discountTotal.toFixed(2)}  Tax: ₹${d.taxTotal.toFixed(2)}`, W-M-10, gy+44, {align:'right'});
+        doc.text(`Sub: ${Rs} ${d.subtotal.toFixed(2)}  Disc: ${Rs} ${d.discountTotal.toFixed(2)}  Tax: ${Rs} ${d.taxTotal.toFixed(2)}`, W-M-10, gy+44, {align:'right'});
 
         if (d.notes) {
             doc.setFontSize(8.5); doc.setFont('helvetica','italic'); doc.setTextColor(107,114,128);
@@ -468,7 +470,7 @@ function buildStationeryPDF(d, tpl) {
 
         doc.autoTable({
             head: [['#','Product','Qty','Price','Disc.','Tax','Total']],
-            body: d.items.map((it,i)=>[i+1, it.name, it.qty, `₹${it.price.toFixed(2)}`, `₹${it.discount.toFixed(2)}`, `${it.tax}%`, `₹${it.total.toFixed(2)}`]),
+            body: d.items.map((it,i)=>[i+1, it.name, it.qty, `${Rs} ${it.price.toFixed(2)}`, `${Rs} ${it.discount.toFixed(2)}`, `${it.tax}%`, `${Rs} ${it.total.toFixed(2)}`]),
             startY: y,
             styles: { fontSize:9.5, cellPadding:6.5 },
             headStyles: { fillColor:[15,23,42], textColor:255, fontStyle:'bold' },
@@ -482,7 +484,7 @@ function buildStationeryPDF(d, tpl) {
         doc.roundedRect(W-M-190, gy, 190, 30, 6,6,'F');
         doc.setFontSize(12); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
         doc.text('GRAND TOTAL', W-M-180, gy+19);
-        doc.text(`₹${d.grandTotal.toFixed(2)}`, W-M-10, gy+19, {align:'right'});
+        doc.text(`${Rs} ${d.grandTotal.toFixed(2)}`, W-M-10, gy+19, {align:'right'});
 
         doc.setFillColor(15,23,42);
         doc.rect(0, H-22, W, 22,'F');
@@ -526,7 +528,7 @@ function buildStationeryPDF(d, tpl) {
 
         doc.autoTable({
             head: [['#','Product','Qty','Price','Disc.','Tax','Total']],
-            body: d.items.map((it,i)=>[i+1, it.name, it.qty, `₹${it.price.toFixed(2)}`, `₹${it.discount.toFixed(2)}`, `${it.tax}%`, `₹${it.total.toFixed(2)}`]),
+            body: d.items.map((it,i)=>[i+1, it.name, it.qty, `${Rs} ${it.price.toFixed(2)}`, `${Rs} ${it.discount.toFixed(2)}`, `${it.tax}%`, `${Rs} ${it.total.toFixed(2)}`]),
             startY: y,
             styles: { fontSize:9.5, cellPadding:7, textColor:[249,250,251], fillColor:[31,41,55] },
             headStyles: { fillColor:[245,158,11], textColor:[17,24,39], fontStyle:'bold' },
@@ -541,7 +543,7 @@ function buildStationeryPDF(d, tpl) {
         doc.roundedRect(W-M-200, gy, 200, 34, 6,6,'F');
         doc.setFontSize(13); doc.setFont('helvetica','bold'); doc.setTextColor(17,24,39);
         doc.text('GRAND TOTAL', W-M-190, gy+21);
-        doc.text(`₹${d.grandTotal.toFixed(2)}`, W-M-10, gy+21, {align:'right'});
+        doc.text(`${Rs} ${d.grandTotal.toFixed(2)}`, W-M-10, gy+21, {align:'right'});
 
         if (d.notes) {
             doc.setFontSize(8.5); doc.setFont('helvetica','italic'); doc.setTextColor(156,163,175);

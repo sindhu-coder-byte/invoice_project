@@ -1,1 +1,1 @@
-web: gunicorn invoice_project.wsgi
+web: gunicorn invoice_project.wsgi:application

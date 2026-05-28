@@ -2,178 +2,245 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-regular-rounded/css/uicons-regular-rounded.css">
 
-<!-- HERO SECTION -->
-<section class="bg-gradient-to-r from-blue-50 via-white to-blue-50 py-16 mb-12 shadow-lg rounded-2xl border border-blue-100 overflow-hidden">
-  <div class="container mx-auto flex flex-col-reverse md:flex-row items-center justify-between px-6">
-    
-    <!-- Text Block -->
-    <div class="md:w-1/2 text-center md:text-left animate-fadeInUp">
-      <h1 class="text-5xl font-extrabold text-gray-800 mb-4 leading-tight">
-        Welcome to <span class="text-amber-500">InvoiceGen</span>
-      </h1>
-      <p class="text-gray-600 leading-relaxed max-w-lg mb-6">
-        Create, manage, and send professional invoices effortlessly. Tailored for businesses, freelancers, and teams who value speed and simplicity.
-      </p>
-      <div class="flex justify-center md:justify-start gap-4">
-        <a href="{% url 'create_invoice_type' 'shopping' %}" 
-           class="bg-amber-500 text-white px-6 py-3 rounded-xl shadow-lg hover:bg-amber-400 transition transform hover:-translate-y-1">
-          + Create Invoice
+<!-- ── HERO ──────────────────────────────────────────────────────── -->
+<section class="relative bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 rounded-2xl px-8 py-12 mb-10 overflow-hidden shadow-xl">
+    <div class="absolute inset-0 opacity-10">
+        <div class="absolute top-0 right-0 w-72 h-72 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
+        <div class="absolute bottom-0 left-0 w-48 h-48 bg-white rounded-full translate-y-1/2 -translate-x-1/2"></div>
+    </div>
+    <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="text-center md:text-left">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-white mb-3 leading-tight">
+                Welcome to <span class="text-yellow-300">InvoiceGen</span>
+            </h1>
+            <p class="text-blue-100 max-w-lg text-sm leading-relaxed">
+                Create professional invoices in seconds. Choose your template, fill in the details, and download a polished PDF.
+            </p>
+            <div class="flex flex-wrap justify-center md:justify-start gap-3 mt-6">
+                <a href="{% url 'create_invoice_type' 'shopping' %}"
+                   class="inline-flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-bold px-5 py-2.5 rounded-xl shadow transition">
+                    <i class="fa-solid fa-plus"></i> Create Invoice
+                </a>
+                <a href="#invoice-types"
+                   class="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white font-semibold px-5 py-2.5 rounded-xl transition">
+                    <i class="fa-solid fa-circle-play"></i> Learn More
+                </a>
+            </div>
+        </div>
+        <img src="https://cdn-icons-png.flaticon.com/512/2534/2534203.png"
+             alt="Invoice" class="w-36 md:w-48 drop-shadow-xl opacity-90">
+    </div>
+</section>
+
+<!-- ── STATS CARDS ───────────────────────────────────────────────── -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center gap-4">
+        <div class="bg-blue-100 text-blue-600 w-12 h-12 rounded-xl flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-file-invoice text-xl"></i>
+        </div>
+        <div>
+            <p class="text-2xl font-extrabold text-gray-900">{{ total_invoices }}</p>
+            <p class="text-xs text-gray-500 font-medium">Total Invoices</p>
+        </div>
+    </div>
+    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center gap-4">
+        <div class="bg-green-100 text-green-600 w-12 h-12 rounded-xl flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-users text-xl"></i>
+        </div>
+        <div>
+            <p class="text-2xl font-extrabold text-gray-900">{{ total_customers }}</p>
+            <p class="text-xs text-gray-500 font-medium">Customers</p>
+        </div>
+    </div>
+    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center gap-4">
+        <div class="bg-purple-100 text-purple-600 w-12 h-12 rounded-xl flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-cart-shopping text-xl"></i>
+        </div>
+        <div>
+            <p class="text-2xl font-extrabold text-gray-900">{{ recent_invoices|length }}</p>
+            <p class="text-xs text-gray-500 font-medium">Recent Activity</p>
+        </div>
+    </div>
+    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center gap-4">
+        <div class="bg-yellow-100 text-yellow-600 w-12 h-12 rounded-xl flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-star text-xl"></i>
+        </div>
+        <div>
+            <p class="text-2xl font-extrabold text-gray-900">3</p>
+            <p class="text-xs text-gray-500 font-medium">Template Styles</p>
+        </div>
+    </div>
+</div>
+
+<!-- ── INVOICE TYPES ─────────────────────────────────────────────── -->
+<section id="invoice-types" class="mb-10">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">Choose Invoice Type</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+
+        <!-- Shopping -->
+        <a href="{% url 'create_invoice_type' 'shopping' %}"
+           class="group bg-white rounded-2xl p-7 shadow-sm border border-gray-100 hover:shadow-lg hover:border-blue-300 transition-all duration-200 flex flex-col">
+            <div class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-5 group-hover:bg-blue-100 transition text-2xl">
+                <i class="fa-solid fa-cart-shopping"></i>
+            </div>
+            <h3 class="font-bold text-lg text-gray-800 mb-1">Shopping Invoice</h3>
+            <p class="text-gray-500 text-sm leading-relaxed mb-4">Professional retail invoices with product catalog, tax, and discount support.</p>
+            <span class="mt-auto text-blue-600 text-sm font-semibold group-hover:underline">Create now →</span>
         </a>
-        <a href="#features" 
-           class="bg-blue-500 text-white px-6 py-3 rounded-xl shadow-lg hover:bg-blue-400 transition transform hover:-translate-y-1">
-          Learn More
+
+        <!-- Hospital -->
+        <a href="{% url 'create_invoice_type' 'hospital' %}"
+           class="group bg-white rounded-2xl p-7 shadow-sm border border-gray-100 hover:shadow-lg hover:border-green-300 transition-all duration-200 flex flex-col">
+            <div class="w-14 h-14 rounded-2xl bg-green-50 text-green-600 flex items-center justify-center mb-5 group-hover:bg-green-100 transition text-2xl">
+                <i class="fa-solid fa-hospital"></i>
+            </div>
+            <h3 class="font-bold text-lg text-gray-800 mb-1">Hospital Invoice</h3>
+            <p class="text-gray-500 text-sm leading-relaxed mb-4">Medical billing with patient info, services, insurance, and payment details.</p>
+            <span class="mt-auto text-green-600 text-sm font-semibold group-hover:underline">Create now →</span>
         </a>
-      </div>
-    </div>
 
-    <!-- Illustration Block -->
-    <div class="md:w-1/2 mb-8 md:mb-0 flex justify-center animate-fadeInRight">
-      <img src="https://cdn-icons-png.flaticon.com/512/2534/2534203.png" 
-           alt="Invoice Illustration" 
-           class="w-80 h-auto drop-shadow-xl">
+        <!-- Stationery -->
+        <a href="{% url 'create_invoice_type' 'stationery' %}"
+           class="group bg-white rounded-2xl p-7 shadow-sm border border-gray-100 hover:shadow-lg hover:border-yellow-300 transition-all duration-200 flex flex-col">
+            <div class="w-14 h-14 rounded-2xl bg-yellow-50 text-yellow-600 flex items-center justify-center mb-5 group-hover:bg-yellow-100 transition text-2xl">
+                <i class="fa-solid fa-pen-ruler"></i>
+            </div>
+            <h3 class="font-bold text-lg text-gray-800 mb-1">Stationery Invoice</h3>
+            <p class="text-gray-500 text-sm leading-relaxed mb-4">Quick invoicing for stationery shops with per-item discounts and Dark PDF template.</p>
+            <span class="mt-auto text-yellow-600 text-sm font-semibold group-hover:underline">Create now →</span>
+        </a>
     </div>
-
-  </div>
 </section>
 
+<!-- ── RECENT INVOICES ───────────────────────────────────────────── -->
+{% if recent_invoices %}
+<section class="mb-10">
+    <div class="flex items-center justify-between mb-5">
+        <h2 class="text-2xl font-bold text-gray-800">Recent Invoices</h2>
+    </div>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <table class="min-w-full text-sm">
+            <thead>
+                <tr class="bg-gray-50 border-b border-gray-100 text-left">
+                    <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Invoice #</th>
+                    <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Customer</th>
+                    <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</th>
+                    <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+                    <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Amount</th>
+                    <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+                {% for inv in recent_invoices %}
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-6 py-4 font-semibold text-blue-600">{{ inv.invoice_no }}</td>
+                    <td class="px-6 py-4 text-gray-700">{{ inv.customer.name }}</td>
+                    <td class="px-6 py-4">
+                        {% if inv.invoice_type == 'SHOP' %}
+                            <span class="inline-flex items-center gap-1 bg-blue-50 text-blue-700 text-xs font-medium px-2.5 py-1 rounded-full">
+                                <i class="fa-solid fa-cart-shopping text-[10px]"></i> Shopping
+                            </span>
+                        {% elif inv.invoice_type == 'HOSP' %}
+                            <span class="inline-flex items-center gap-1 bg-green-50 text-green-700 text-xs font-medium px-2.5 py-1 rounded-full">
+                                <i class="fa-solid fa-hospital text-[10px]"></i> Hospital
+                            </span>
+                        {% else %}
+                            <span class="inline-flex items-center gap-1 bg-yellow-50 text-yellow-700 text-xs font-medium px-2.5 py-1 rounded-full">
+                                <i class="fa-solid fa-pen-ruler text-[10px]"></i> Stationery
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-gray-500">{{ inv.date }}</td>
+                    <td class="px-6 py-4 text-right font-semibold text-gray-800">₹{{ inv.total_amount|floatformat:2 }}</td>
+                    <td class="px-6 py-4 text-center">
+                        <a href="{% url 'invoice_detail' inv.id %}"
+                           class="inline-flex items-center gap-1 text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg transition">
+                            <i class="fa-solid fa-eye"></i> View
+                        </a>
+                        <a href="{% url 'invoice_pdf' inv.id %}?style=classic"
+                           class="inline-flex items-center gap-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition ml-1">
+                            <i class="fa-solid fa-file-pdf"></i> PDF
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endif %}
 
-<!-- INVOICE TEMPLATES -->
-
-<section id="features" class="bg-gradient-to-r from-blue-50 to-indigo-50 shadow-md p-12 rounded-2xl mb-16 border border-gray-200">
-  <h2 class="text-4xl font-extrabold text-gray-800 text-center mb-12 tracking-tight">
-    Invoice Templates
-  </h2>
-
-  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
-    <!-- Shopping -->
-    <a href="{% url 'create_invoice_type' 'shopping' %}" 
-       class="group border border-gray-200 rounded-2xl p-8 bg-white hover:shadow-2xl hover:border-blue-400 transition-all duration-300 ease-in-out transform hover:-translate-y-2">
-      <div class="flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 mb-4 group-hover:bg-blue-200 transition">
-        <i class="fi fi-rr-shopping-cart text-blue-600 text-3xl"></i>
-      </div>
-      <h3 class="font-semibold text-xl text-gray-900 mb-3">Shopping Invoices</h3>
-      <p class="text-gray-600 leading-relaxed">Create clean and professional invoices for your retail business with ease.</p>
-    </a>
-
-    <!-- Hospital -->
-    <a href="{% url 'create_invoice_type' 'hospital' %}" 
-       class="group border border-gray-200 rounded-2xl p-8 bg-white hover:shadow-2xl hover:border-blue-400 transition-all duration-300 ease-in-out transform hover:-translate-y-2">
-      <div class="flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4 group-hover:bg-green-200 transition">
-        <i class="fi fi-rr-hospital text-green-600 text-3xl"></i>
-      </div>
-      <h3 class="font-semibold text-xl text-gray-900 mb-3">Hospital Invoices</h3>
-      <p class="text-gray-600 leading-relaxed">Generate detailed invoices for medical services, treatments, and consultations.</p>
-    </a>
-
-    <!-- Stationery -->
-    <a href="{% url 'create_invoice_type' 'stationery' %}" 
-       class="group border border-gray-200 rounded-2xl p-8 bg-white hover:shadow-2xl hover:border-blue-400 transition-all duration-300 ease-in-out transform hover:-translate-y-2">
-      <div class="flex items-center justify-center w-16 h-16 rounded-full bg-yellow-100 mb-4 group-hover:bg-yellow-200 transition">
-        <i class="fi fi-rr-pencil text-yellow-600 text-3xl"></i>
-      </div>
-      <h3 class="font-semibold text-xl text-gray-900 mb-3">Stationery Invoices</h3>
-      <p class="text-gray-600 leading-relaxed">Quickly create invoices for stationery shops, schools, and office supplies.</p>
-    </a>
-  </div>
+<!-- ── HOW IT WORKS ──────────────────────────────────────────────── -->
+<section class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-10">
+    <h2 class="text-2xl font-bold text-gray-800 text-center mb-10">How It Works</h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 relative">
+        <div class="hidden md:block absolute top-7 left-[15%] right-[15%] h-0.5 bg-gradient-to-r from-blue-200 via-blue-400 to-blue-200"></div>
+        {% for step in "1234" %}{% endfor %}
+        <div class="text-center relative z-10">
+            <div class="w-14 h-14 rounded-full bg-blue-600 text-white flex items-center justify-center mx-auto mb-3 shadow-lg text-xl">
+                <i class="fa-solid fa-user-plus"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 text-sm">Add Customer</h3>
+            <p class="text-gray-500 text-xs mt-1">Enter customer details</p>
+        </div>
+        <div class="text-center relative z-10">
+            <div class="w-14 h-14 rounded-full bg-green-500 text-white flex items-center justify-center mx-auto mb-3 shadow-lg text-xl">
+                <i class="fa-solid fa-boxes-stacked"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 text-sm">Add Items</h3>
+            <p class="text-gray-500 text-xs mt-1">List products or services</p>
+        </div>
+        <div class="text-center relative z-10">
+            <div class="w-14 h-14 rounded-full bg-yellow-500 text-white flex items-center justify-center mx-auto mb-3 shadow-lg text-xl">
+                <i class="fa-solid fa-file-invoice-dollar"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 text-sm">Generate Invoice</h3>
+            <p class="text-gray-500 text-xs mt-1">Auto-calculate totals</p>
+        </div>
+        <div class="text-center relative z-10">
+            <div class="w-14 h-14 rounded-full bg-purple-600 text-white flex items-center justify-center mx-auto mb-3 shadow-lg text-xl">
+                <i class="fa-solid fa-download"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 text-sm">Download PDF</h3>
+            <p class="text-gray-500 text-xs mt-1">Get polished PDF instantly</p>
+        </div>
+    </div>
 </section>
 
-
-<!-- How It Works Section -->
-<section class="bg-gradient-to-r from-blue-50 via-white to-blue-50 shadow-lg p-12 rounded-2xl mb-16 border border-gray-200 relative overflow-hidden">
-  <h2 class="text-4xl font-extrabold text-gray-800 text-center mb-16 tracking-tight">
-    How It Works
-  </h2>
-
-  <div class="flex flex-col md:flex-row justify-between items-start md:items-center relative">
-    <!-- Timeline Line -->
-    <div class="hidden md:block absolute top-10 left-[12%] right-[12%] h-1 bg-gradient-to-r from-blue-300 via-blue-400 to-blue-500 rounded-full shadow-md animate-pulse"></div>
-
-    <!-- Step 1 -->
-    <div class="text-center md:w-1/4 relative z-10 mb-12 md:mb-0 group animate-fadeInUp">
-      <div class="w-20 h-20 flex items-center justify-center mx-auto mb-4 rounded-full bg-blue-100 border-4 border-blue-300 shadow-lg group-hover:scale-110 transition-transform duration-300">
-        <i class="fi fi-rr-user-add text-blue-600 text-3xl"></i>
-      </div>
-      <h3 class="font-semibold text-lg text-gray-800">Add Customer</h3>
-      <p class="text-gray-500">Enter your customer's details.</p>
+<!-- ── WHY CHOOSE US ─────────────────────────────────────────────── -->
+<section id="why-choose-us" class="mb-10">
+    <h2 class="text-2xl font-bold text-gray-800 text-center mb-8">Why Choose InvoiceGen?</h2>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-5">
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center hover:shadow-md hover:-translate-y-1 transition-all">
+            <div class="bg-blue-50 text-blue-600 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4 text-xl">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 mb-1.5">Easy Interface</h3>
+            <p class="text-gray-500 text-xs leading-relaxed">Intuitive design, no training needed.</p>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center hover:shadow-md hover:-translate-y-1 transition-all">
+            <div class="bg-green-50 text-green-600 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4 text-xl">
+                <i class="fa-solid fa-palette"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 mb-1.5">Pro Templates</h3>
+            <p class="text-gray-500 text-xs leading-relaxed">Classic, Modern, and Minimal PDF styles.</p>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center hover:shadow-md hover:-translate-y-1 transition-all">
+            <div class="bg-yellow-50 text-yellow-600 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4 text-xl">
+                <i class="fa-solid fa-image"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 mb-1.5">Custom Branding</h3>
+            <p class="text-gray-500 text-xs leading-relaxed">Upload your logo for a branded look.</p>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center hover:shadow-md hover:-translate-y-1 transition-all">
+            <div class="bg-red-50 text-red-500 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4 text-xl">
+                <i class="fa-solid fa-bolt"></i>
+            </div>
+            <h3 class="font-semibold text-gray-800 mb-1.5">Instant PDF</h3>
+            <p class="text-gray-500 text-xs leading-relaxed">Download a polished PDF with one click.</p>
+        </div>
     </div>
-
-    <!-- Step 2 -->
-    <div class="text-center md:w-1/4 relative z-10 mb-12 md:mb-0 group animate-fadeInUp delay-200">
-      <div class="w-20 h-20 flex items-center justify-center mx-auto mb-4 rounded-full bg-green-100 border-4 border-green-300 shadow-lg group-hover:scale-110 transition-transform duration-300">
-        <i class="fi fi-rr-box-open text-green-600 text-3xl"></i>
-      </div>
-      <h3 class="font-semibold text-lg text-gray-800">Add Products/Services</h3>
-      <p class="text-gray-500">List items or services provided.</p>
-    </div>
-
-    <!-- Step 3 -->
-    <div class="text-center md:w-1/4 relative z-10 mb-12 md:mb-0 group animate-fadeInUp delay-300">
-      <div class="w-20 h-20 flex items-center justify-center mx-auto mb-4 rounded-full bg-yellow-100 border-4 border-yellow-300 shadow-lg group-hover:scale-110 transition-transform duration-300">
-        <i class="fi fi-rr-file-invoice-dollar text-yellow-600 text-3xl"></i>
-      </div>
-      <h3 class="font-semibold text-lg text-gray-800">Create Invoice</h3>
-      <p class="text-gray-500">Generate the invoice instantly.</p>
-    </div>
-
-    <!-- Step 4 -->
-    <div class="text-center md:w-1/4 relative z-10 group animate-fadeInUp delay-500">
-      <div class="w-20 h-20 flex items-center justify-center mx-auto mb-4 rounded-full bg-purple-100 border-4 border-purple-300 shadow-lg group-hover:scale-110 transition-transform duration-300">
-        <i class="fi fi-rr-paper-plane text-purple-600 text-3xl"></i>
-      </div>
-      <h3 class="font-semibold text-lg text-gray-800">Download / Email</h3>
-      <p class="text-gray-500">Download or send directly to clients.</p>
-    </div>
-  </div>
 </section>
-
-<!-- WHY CHOOSE US -->
-<section id="why-choose-us" class="relative bg-gradient-to-br from-white via-blue-50 to-white p-12 rounded-3xl shadow-lg mb-16 border border-gray-200">
-  <h2 class="text-4xl font-extrabold text-gray-900 text-center mb-12 tracking-tight">
-    Why Choose <span class="text-blue-600">InvoiceGen?</span>
-  </h2>
-  
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-    
-    <!-- Feature Card -->
-    <div class="group flex flex-col items-center text-center p-6 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-xl hover:border-blue-300 transition transform hover:-translate-y-2">
-      <div class="w-14 h-14 flex items-center justify-center rounded-full bg-blue-100 mb-4 group-hover:bg-blue-200 transition">
-        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="w-7 h-7" alt="UI Icon">
-      </div>
-      <h3 class="text-lg font-semibold text-gray-800 mb-2">Easy Interface</h3>
-      <p class="text-gray-600 text-sm">Simple, intuitive design that anyone can use without training.</p>
-    </div>
-
-    <!-- Feature Card -->
-    <div class="group flex flex-col items-center text-center p-6 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-xl hover:border-blue-300 transition transform hover:-translate-y-2">
-      <div class="w-14 h-14 flex items-center justify-center rounded-full bg-green-100 mb-4 group-hover:bg-green-200 transition">
-        <img src="https://cdn-icons-png.flaticon.com/512/3039/3039386.png" class="w-7 h-7" alt="Template Icon">
-      </div>
-      <h3 class="text-lg font-semibold text-gray-800 mb-2">Pro Templates</h3>
-      <p class="text-gray-600 text-sm">Choose from sleek, ready-to-use invoice templates.</p>
-    </div>
-
-    <!-- Feature Card -->
-    <div class="group flex flex-col items-center text-center p-6 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-xl hover:border-blue-300 transition transform hover:-translate-y-2">
-      <div class="w-14 h-14 flex items-center justify-center rounded-full bg-yellow-100 mb-4 group-hover:bg-yellow-200 transition">
-        <img src="https://cdn-icons-png.flaticon.com/512/1828/1828884.png" class="w-7 h-7" alt="Branding Icon">
-      </div>
-      <h3 class="text-lg font-semibold text-gray-800 mb-2">Custom Branding</h3>
-      <p class="text-gray-600 text-sm">Add your logo and colors for a professional look.</p>
-    </div>
-
-    <!-- Feature Card -->
-    <div class="group flex flex-col items-center text-center p-6 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-xl hover:border-blue-300 transition transform hover:-translate-y-2">
-      <div class="w-14 h-14 flex items-center justify-center rounded-full bg-red-100 mb-4 group-hover:bg-red-200 transition">
-        <img src="https://cdn-icons-png.flaticon.com/512/2910/2910768.png" class="w-7 h-7" alt="Save Time Icon">
-      </div>
-      <h3 class="text-lg font-semibold text-gray-800 mb-2">Save Time</h3>
-      <p class="text-gray-600 text-sm">Automate billing and save valuable hours of work.</p>
-    </div>
-    
-  </div>
-</section>
-
 
 {% endblock %}

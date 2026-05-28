@@ -2,401 +2,785 @@
 {% block title %}Shopping Invoice{% endblock %}
 
 {% block content %}
-<h2 class="text-2xl font-bold mb-6 text-gray-800">Create Shopping Invoice</h2>
-
-<form id="shopping-invoice-form" method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-
-    <div class="flex flex-col md:flex-row justify-between items-center mb-4">
-        <!-- Logo Upload -->
-        <div class="mb-4 md:mb-0">
-            <label class="block text-gray-700 font-semibold mb-1">Upload Company Logo</label>
-            <div id="dropbox" class="border-2 border-dashed border-gray-400 p-4 text-center cursor-pointer bg-white hover:bg-gray-50">
-                Drag & Drop or Click to Upload
-                <input type="file" name="logo" accept="image/*" class="hidden" required>
-            </div>
-            <img id="preview-logo" class="mt-2 h-16 mx-auto hidden" />
-        </div>
-
-        <!-- Invoice Info -->
-        <div class="flex flex-col space-y-2 text-gray-700">
-            <div>Invoice No: <input type="text" name="invoice_no" value="SHOP-001" class="border rounded px-2 py-1 w-32 bg-white" required></div>
-            <div>Date: <input type="date" name="date" class="border rounded px-2 py-1 bg-white" required></div>
-            <div>Due Date: <input type="date" name="due_date" class="border rounded px-2 py-1 bg-white" required></div>
-            <div>Payment Terms: 
-                <select name="payment_terms" class="border rounded px-2 py-1 bg-white">
-                    <option value="Due on Receipt">Due on Receipt</option>
-                    <option value="Net 7">Net 7</option>
-                    <option value="Net 15">Net 15</option>
-                    <option value="Net 30">Net 30</option>
-                </select>
-            </div>
-            <div>
-                Currency:
-                <select id="currency" name="currency" class="border rounded px-2 py-1 bg-white">
-                    <option value="₹">₹ - INR</option>
-                    <option value="$">$ - USD</option>
-                    <option value="€">€ - EUR</option>
-                    <option value="£">£ - GBP</option>
-                    <option value="¥">¥ - JPY</option>
-                </select>
-            </div>
-        </div>
-    </div>
-
-    <!-- Company Details -->
-    <div class="mb-4">
-        <h3 class="text-lg font-semibold mb-2 text-gray-800">Company Details</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <label class="block text-gray-700 font-semibold mb-1">Company Name</label>
-                <input type="text" name="company_name" class="border rounded px-2 py-1 w-64 bg-white" required>
-            </div>
-            <div>
-                <label class="block text-gray-700 font-semibold mb-1">Address</label>
-                <input type="text" name="company_address" class="border rounded px-2 py-1 w-64 bg-white" required>
-            </div>
-            <div>
-                <label class="block text-gray-700 font-semibold mb-1">Phone</label>
-                <input type="text" name="company_phone" class="border rounded px-2 py-1 w-64 bg-white" required>
-            </div>
-            <div>
-                <label class="block text-gray-700 font-semibold mb-1">Email</label>
-                <input type="email" name="company_email" class="border rounded px-2 py-1 w-64 bg-white" required>
-            </div>
-            <div class="md:col-span-2">
-                <label class="block text-gray-700 font-semibold mb-1">Bank Details</label>
-                <textarea name="company_bank" placeholder="Bank Name, Account No, IFSC, Branch" class="border rounded px-2 py-1 w-full bg-white"></textarea>
-            </div>
-        </div>
-    </div>
-
-    <!-- Customer Details -->
-    <div class="mb-4">
-        <h3 class="text-lg font-semibold mb-2 text-gray-800">Customer Details</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <label class="block text-gray-700 font-semibold mb-1">Customer Name</label>
-                <input type="text" name="customer_name" class="border rounded px-2 py-1 w-64 bg-white" required>
-            </div>
-            <div>
-                <label class="block text-gray-700 font-semibold mb-1">Customer Email</label>
-                <input type="email" name="customer_email" class="border rounded px-2 py-1 w-64 bg-white">
-            </div>
-            <div>
-                <label class="block text-gray-700 font-semibold mb-1">Customer Phone</label>
-                <input type="text" name="customer_phone" class="border rounded px-2 py-1 w-64 bg-white" required>
-            </div>
-            <div>
-                <label class="block text-gray-700 font-semibold mb-1">Customer Address</label>
-                <input type="text" name="customer_address" class="border rounded px-2 py-1 w-64 bg-white" required>
-            </div>
-        </div>
-    </div>
-
-    <!-- Products Table -->
-    <h3 class="text-lg font-semibold mb-2 text-gray-800">Products / Items</h3>
-    <div class="overflow-x-auto">
-        <table class="min-w-full bg-white rounded shadow-md">
-            <thead class="bg-gray-200">
-                <tr>
-                    <th class="px-4 py-2 text-left">Item Name</th>
-                    <th class="px-4 py-2">Qty</th>
-                    <th class="px-4 py-2">Price</th>
-                    <th class="px-4 py-2">Tax</th>
-                    <th class="px-4 py-2">Total</th>
-                    <th class="px-4 py-2">Action</th>
-                </tr>
-            </thead>
-            <tbody id="items-body"></tbody>
-        </table>
-    </div>
-    <div class="mt-2 flex justify-start gap-2">
-        <button type="button" class="bg-amber-500 text-white px-3 py-1 rounded hover:bg-amber-400" onclick="addItemRow()">+ Add Item</button>
-    </div>
-
-    <!-- Totals -->
-    <div class="mt-6 bg-white p-4 rounded shadow-md max-w-md space-y-2">
-        <div class="flex justify-between"><span>Subtotal:</span><span id="subtotal">₹0</span></div>
-        <div class="flex justify-between"><span>Tax:</span><span id="tax-total">₹0</span></div>
-        <div class="flex justify-between items-center">
-            <span>Discount (%):</span>
-            <input type="number" id="discount" value="0" class="border rounded px-2 py-1 w-24 bg-white" oninput="updateTotals()">
-        </div>
-        <div class="flex justify-between font-bold text-gray-800 text-lg border-t pt-2">
-            <span>GRAND TOTAL:</span><span id="grand-total">₹0</span>
-        </div>
-    </div>
-
-    <!-- Notes & Terms -->
-    <div class="mt-6">
-        <h3 class="text-lg font-semibold mb-2 text-gray-800">Additional Info</h3>
-        <textarea name="notes" placeholder="Enter special notes (e.g., Thank you for your business)" class="border rounded px-2 py-1 w-full mb-2 bg-white"></textarea>
-        <textarea name="terms" placeholder="Enter terms & conditions (e.g., Goods once sold cannot be returned)" class="border rounded px-2 py-1 w-full bg-white"></textarea>
-    </div>
-
-    <!-- Authorized Signature -->
-    <div class="mt-6 flex justify-end items-center">
-        <div class="text-center">
-            <p class="font-semibold">Authorized Signatory</p>
-            <p class="text-sm text-gray-600">(Sign & Stamp)</p>
-        </div>
-    </div>
-
-    <!-- Action Buttons -->
-    <div class="mt-4 flex gap-2">
-        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-500">Save Invoice</button>
-        <button type="button" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500" onclick="previewInvoice()">Preview</button>
-        <button type="button" class="bg-amber-500 text-white px-4 py-2 rounded hover:bg-amber-400" onclick="downloadPDF()">Download PDF</button>
-    </div>
-</form>
-
+<!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
+<!-- Page header -->
+<div class="flex items-center gap-3 mb-6">
+    <div class="bg-blue-600 text-white w-10 h-10 rounded-xl flex items-center justify-center text-lg shadow">
+        <i class="fa-solid fa-cart-shopping"></i>
+    </div>
+    <div>
+        <h1 class="text-2xl font-extrabold text-gray-900">Shopping Invoice</h1>
+        <p class="text-sm text-gray-500">Fill in the details, then download a polished PDF.</p>
+    </div>
+</div>
+
+<form id="shopping-invoice-form" class="space-y-6">
+
+<!-- ── ROW 1: Logo + Invoice Info ─────────────────── -->
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+    <div class="flex flex-col md:flex-row gap-6 items-start">
+
+        <!-- Logo Upload -->
+        <div class="flex-shrink-0">
+            <p class="text-sm font-semibold text-gray-700 mb-2">Company Logo</p>
+            <div id="dropbox"
+                 class="w-36 h-36 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition bg-gray-50 relative">
+                <input type="file" name="logo" accept="image/*" class="hidden" id="logo-file">
+                <img id="preview-logo" class="hidden absolute inset-0 w-full h-full object-contain p-2 rounded-xl" alt="Logo">
+                <i class="fa-solid fa-cloud-arrow-up text-2xl text-gray-400 mb-1"></i>
+                <span class="text-xs text-gray-400 text-center px-2">Click or drag logo here</span>
+            </div>
+        </div>
+
+        <!-- Invoice Meta -->
+        <div class="flex-1 grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 mb-1">Invoice No.</label>
+                <input type="text" name="invoice_no" value="SHOP-001"
+                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-50 focus:ring-2 focus:ring-blue-400 outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 mb-1">Invoice Date</label>
+                <input type="date" name="date"
+                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 mb-1">Due Date</label>
+                <input type="date" name="due_date"
+                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 mb-1">Payment Terms</label>
+                <select name="payment_terms" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+                    <option>Due on Receipt</option>
+                    <option>Net 7</option>
+                    <option>Net 15</option>
+                    <option>Net 30</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 mb-1">Currency</label>
+                <select id="currency" name="currency" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+                    <option value="₹">₹ INR</option>
+                    <option value="$">$ USD</option>
+                    <option value="€">€ EUR</option>
+                    <option value="£">£ GBP</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── ROW 2: Company + Customer ─────────────────── -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Company -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-3">
+        <h3 class="text-sm font-bold text-gray-700 flex items-center gap-2">
+            <i class="fa-solid fa-building text-blue-500"></i> Company Details
+        </h3>
+        <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Company Name</label>
+            <input type="text" name="company_name" placeholder="Your Company Pvt Ltd"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Address</label>
+            <input type="text" name="company_address" placeholder="123 Main St, City"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 mb-1">Phone</label>
+                <input type="text" name="company_phone" placeholder="+91 98765 43210"
+                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 mb-1">Email</label>
+                <input type="email" name="company_email" placeholder="info@company.com"
+                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+            </div>
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Bank Details</label>
+            <textarea name="company_bank" rows="2" placeholder="Bank Name | Account No | IFSC | Branch"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none resize-none"></textarea>
+        </div>
+    </div>
+
+    <!-- Customer -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-3">
+        <h3 class="text-sm font-bold text-gray-700 flex items-center gap-2">
+            <i class="fa-solid fa-user text-green-500"></i> Customer Details
+        </h3>
+        <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Customer Name</label>
+            <input type="text" name="customer_name" placeholder="John Doe"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 mb-1">Email</label>
+                <input type="email" name="customer_email" placeholder="john@email.com"
+                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 mb-1">Phone</label>
+                <input type="text" name="customer_phone" placeholder="+91 98765 43210"
+                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+            </div>
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Address</label>
+            <input type="text" name="customer_address" placeholder="Customer Address"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">GSTIN (optional)</label>
+            <input type="text" name="customer_gstin" placeholder="22AAAAA0000A1Z5"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none font-mono">
+        </div>
+    </div>
+</div>
+
+<!-- ── ROW 3: Items Table ─────────────────────────── -->
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <h3 class="text-sm font-bold text-gray-700 flex items-center gap-2">
+            <i class="fa-solid fa-list text-purple-500"></i> Products / Items
+        </h3>
+        <button type="button" onclick="addItemRow()"
+            class="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-2 rounded-lg transition">
+            <i class="fa-solid fa-plus"></i> Add Item
+        </button>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="bg-gray-50 border-b border-gray-100 text-left">
+                    <th class="px-4 py-3 text-xs font-semibold text-gray-500">Item Name</th>
+                    <th class="px-4 py-3 text-xs font-semibold text-gray-500 text-center w-20">Qty</th>
+                    <th class="px-4 py-3 text-xs font-semibold text-gray-500 text-right w-28">Price</th>
+                    <th class="px-4 py-3 text-xs font-semibold text-gray-500 text-center w-24">Tax %</th>
+                    <th class="px-4 py-3 text-xs font-semibold text-gray-500 text-right w-28">Total</th>
+                    <th class="px-4 py-3 text-xs font-semibold text-gray-500 text-center w-16"></th>
+                </tr>
+            </thead>
+            <tbody id="items-body" class="divide-y divide-gray-50"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ── ROW 4: Totals + Notes ─────────────────────── -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Notes -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-3">
+        <h3 class="text-sm font-bold text-gray-700 flex items-center gap-2">
+            <i class="fa-solid fa-note-sticky text-yellow-500"></i> Notes &amp; Terms
+        </h3>
+        <textarea name="notes" rows="3" placeholder="Thank you for your business!"
+            class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none resize-none"></textarea>
+        <textarea name="terms" rows="2" placeholder="Goods once sold cannot be returned."
+            class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none resize-none"></textarea>
+    </div>
+
+    <!-- Totals -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <h3 class="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-calculator text-blue-500"></i> Summary
+        </h3>
+        <div class="space-y-2 text-sm">
+            <div class="flex justify-between text-gray-600">
+                <span>Subtotal</span><span id="subtotal" class="font-medium text-gray-800">₹0.00</span>
+            </div>
+            <div class="flex justify-between text-gray-600">
+                <span>Tax</span><span id="tax-total" class="font-medium text-gray-800">₹0.00</span>
+            </div>
+            <div class="flex justify-between items-center text-gray-600">
+                <span>Discount (%)</span>
+                <input type="number" id="discount" value="0" min="0" max="100"
+                    class="w-20 border border-gray-200 rounded-lg px-2 py-1 text-sm text-right focus:ring-2 focus:ring-blue-400 outline-none"
+                    oninput="updateTotals()">
+            </div>
+            <div class="flex justify-between font-bold text-base border-t border-gray-200 pt-3 mt-2">
+                <span class="text-gray-900">Grand Total</span>
+                <span id="grand-total" class="text-blue-600 text-lg">₹0.00</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── ROW 5: Template + Actions ─────────────────── -->
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <!-- Template selector -->
+        <div>
+            <p class="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-palette text-pink-500"></i> PDF Template Style
+            </p>
+            <div class="flex gap-3">
+                <label class="cursor-pointer">
+                    <input type="radio" name="invoice_template" value="classic" class="hidden peer" checked>
+                    <div class="border-2 rounded-xl px-4 py-3 text-center min-w-[90px] peer-checked:border-blue-600 peer-checked:bg-blue-50 border-gray-200 hover:border-gray-300 transition">
+                        <i class="fa-solid fa-file-lines text-xl text-blue-600 block mb-1"></i>
+                        <p class="text-xs font-semibold text-gray-700">Classic</p>
+                    </div>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="radio" name="invoice_template" value="modern" class="hidden peer">
+                    <div class="border-2 rounded-xl px-4 py-3 text-center min-w-[90px] peer-checked:border-indigo-600 peer-checked:bg-indigo-50 border-gray-200 hover:border-gray-300 transition">
+                        <i class="fa-solid fa-file-circle-check text-xl text-indigo-600 block mb-1"></i>
+                        <p class="text-xs font-semibold text-gray-700">Modern</p>
+                    </div>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="radio" name="invoice_template" value="minimal" class="hidden peer">
+                    <div class="border-2 rounded-xl px-4 py-3 text-center min-w-[90px] peer-checked:border-gray-800 peer-checked:bg-gray-50 border-gray-200 hover:border-gray-300 transition">
+                        <i class="fa-solid fa-minimize text-xl text-gray-700 block mb-1"></i>
+                        <p class="text-xs font-semibold text-gray-700">Minimal</p>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="flex flex-wrap gap-2">
+            <button type="button" onclick="previewInvoice()"
+                class="inline-flex items-center gap-2 bg-white border border-gray-200 hover:border-blue-400 text-gray-700 hover:text-blue-600 font-semibold text-sm px-4 py-2.5 rounded-xl transition">
+                <i class="fa-solid fa-eye"></i> Preview
+            </button>
+            <button type="button" onclick="downloadPDF()"
+                class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm px-5 py-2.5 rounded-xl shadow transition">
+                <i class="fa-solid fa-file-pdf"></i> Download PDF
+            </button>
+        </div>
+    </div>
+</div>
+
+</form><!-- end form -->
+
 <script>
-// ==================== Logo Dropbox ====================
+/* ─────────────────────────────────────────────
+   Logo Upload
+───────────────────────────────────────────── */
 let logoDataURL = '';
-const dropbox = document.getElementById('dropbox');
-const fileInput = dropbox.querySelector('input[type="file"]');
-const previewLogo = document.getElementById('preview-logo');
+const dropbox    = document.getElementById('dropbox');
+const fileInput  = document.getElementById('logo-file');
+const previewImg = document.getElementById('preview-logo');
 
 dropbox.addEventListener('click', () => fileInput.click());
-dropbox.addEventListener('dragover', e => { e.preventDefault(); dropbox.classList.add('border-blue-500'); });
-dropbox.addEventListener('dragleave', e => { e.preventDefault(); dropbox.classList.remove('border-blue-500'); });
+dropbox.addEventListener('dragover', e => { e.preventDefault(); dropbox.classList.add('border-blue-500','bg-blue-50'); });
+dropbox.addEventListener('dragleave', () => dropbox.classList.remove('border-blue-500','bg-blue-50'));
 dropbox.addEventListener('drop', e => {
-    e.preventDefault(); dropbox.classList.remove('border-blue-500');
-    const file = e.dataTransfer.files[0]; fileInput.files = e.dataTransfer.files;
-    if(file){
-        const reader = new FileReader();
-        reader.onload = e => { logoDataURL = e.target.result; previewLogo.src = logoDataURL; previewLogo.classList.remove('hidden'); };
-        reader.readAsDataURL(file);
-    }
+    e.preventDefault(); dropbox.classList.remove('border-blue-500','bg-blue-50');
+    const file = e.dataTransfer.files[0];
+    if (file) loadLogo(file);
 });
-fileInput.addEventListener('change', e => {
-    const file = e.target.files[0];
-    if(file){
-        const reader = new FileReader();
-        reader.onload = e => { logoDataURL = e.target.result; previewLogo.src = logoDataURL; previewLogo.classList.remove('hidden'); };
-        reader.readAsDataURL(file);
-    }
-});
+fileInput.addEventListener('change', e => { if (e.target.files[0]) loadLogo(e.target.files[0]); });
 
-// ==================== Products ====================
-const itemsList = [
-    { name: 'Cashew Nuts', price: 300, tax: 5 },
-    { name: 'Tea', price: 120, tax: 5 },
-    { name: 'Almonds', price: 450 , tax: 12 },
-    { name: 'Sugar', price: 300, tax: 5 },
-    { name: 'Ghee', price: 250, tax: 12 },
-];
-
-// ==================== Currency Helper ====================
-function getCurrency() {
-    const select = document.getElementById('currency');
-    return select ? select.value : '₹';
+function loadLogo(file) {
+    const reader = new FileReader();
+    reader.onload = ev => {
+        logoDataURL = ev.target.result;
+        previewImg.src = logoDataURL;
+        previewImg.classList.remove('hidden');
+        dropbox.querySelector('i')?.classList.add('hidden');
+        dropbox.querySelector('span')?.classList.add('hidden');
+    };
+    reader.readAsDataURL(file);
 }
 
-// Update totals whenever currency changes
-document.getElementById('currency').addEventListener('change', updateTotals);
+/* ─────────────────────────────────────────────
+   Sample items list
+───────────────────────────────────────────── */
+const ITEMS = [
+    { name: 'Cashew Nuts (500g)', price: 300, tax: 5 },
+    { name: 'Premium Tea (250g)', price: 120, tax: 5 },
+    { name: 'Almonds (500g)',     price: 450, tax: 12 },
+    { name: 'Pure Sugar (1kg)',   price:  55, tax: 5 },
+    { name: 'Desi Ghee (1L)',     price: 560, tax: 12 },
+    { name: 'Basmati Rice (5kg)', price: 380, tax: 5 },
+    { name: 'Olive Oil (500ml)',  price: 290, tax: 12 },
+    { name: 'Dark Chocolate',     price: 150, tax: 18 },
+];
 
-// ==================== Items Table ====================
-function addItemRow() {
+function getCurrency() {
+    return document.getElementById('currency')?.value || '₹';
+}
+
+/* ─────────────────────────────────────────────
+   Add / remove rows
+───────────────────────────────────────────── */
+function addItemRow(idx = '', qty = 1) {
     const tbody = document.getElementById('items-body');
-    const row = document.createElement('tr'); 
-    row.classList.add('border-b');
-    const currency = getCurrency();
+    const row   = document.createElement('tr');
+    row.className = 'hover:bg-gray-50 transition';
+    const cur = getCurrency();
+
     row.innerHTML = `
-        <td class="px-4 py-2">
-            <select class="item-select border rounded px-2 py-1 w-full" onchange="updateRow(this)" required>
-                <option value="">Select Item</option>
-                ${itemsList.map((item,i)=>`<option value="${i}">${item.name}</option>`).join('')}
-            </select>
-        </td>
-        <td class="px-4 py-2"><input type="number" min="1" value="1" class="qty-input border rounded px-2 py-1 w-20" oninput="updateRow(this)" required></td>
-        <td class="px-4 py-2 price-cell">${currency}0.00</td>
-        <td class="px-4 py-2 tax-cell">0%</td>
-        <td class="px-4 py-2 total-cell">${currency}0.00</td>
-        <td class="px-4 py-2 text-center"><button type="button" class="text-red-600 hover:text-red-500" onclick="removeRow(this)">Remove</button></td>
+      <td class="px-4 py-2">
+        <select class="item-select w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-400 outline-none" onchange="onRowChange(this)">
+          <option value="">— Select item —</option>
+          ${ITEMS.map((it,i)=>`<option value="${i}" ${i==idx?'selected':''}>${it.name}</option>`).join('')}
+        </select>
+      </td>
+      <td class="px-4 py-2">
+        <input type="number" min="1" value="${qty}" class="qty-input w-16 border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-center focus:ring-2 focus:ring-blue-400 outline-none" oninput="onRowChange(this)">
+      </td>
+      <td class="px-4 py-2 text-right price-cell text-sm text-gray-700">${cur}0.00</td>
+      <td class="px-4 py-2 text-center tax-cell text-xs text-blue-700 font-medium">—</td>
+      <td class="px-4 py-2 text-right total-cell text-sm font-semibold text-gray-900">${cur}0.00</td>
+      <td class="px-4 py-2 text-center">
+        <button type="button" onclick="this.closest('tr').remove();updateTotals()" class="text-red-400 hover:text-red-600 transition">
+          <i class="fa-solid fa-trash text-xs"></i>
+        </button>
+      </td>
     `;
     tbody.appendChild(row);
+    if (idx !== '') { row.querySelector('.item-select').value = String(idx); }
     updateRow(row.querySelector('.item-select'));
 }
 
-function removeRow(button){ 
-    button.closest('tr').remove(); 
-    updateTotals(); 
-}
+function onRowChange(el) { updateRow(el.closest('tr').querySelector('.item-select')); }
 
-function updateRow(element){
-    const row = element.closest('tr');
-    const select = row.querySelector('.item-select');
-    const qtyInput = row.querySelector('.qty-input');
-    const priceCell = row.querySelector('.price-cell');
-    const taxCell = row.querySelector('.tax-cell');
-    const totalCell = row.querySelector('.total-cell');
-    const currency = getCurrency();
-
-    if(select.value===""){ 
-        priceCell.innerText=`${currency}0.00`; 
-        taxCell.innerText="0%"; 
-        totalCell.innerText=`${currency}0.00`; 
-        updateTotals(); return; 
+function updateRow(sel) {
+    const row  = sel.closest('tr');
+    const qty  = parseInt(row.querySelector('.qty-input').value) || 0;
+    const cur  = getCurrency();
+    if (!sel.value) {
+        row.querySelector('.price-cell').textContent = `${cur}0.00`;
+        row.querySelector('.tax-cell').textContent   = '—';
+        row.querySelector('.total-cell').textContent = `${cur}0.00`;
+    } else {
+        const it      = ITEMS[parseInt(sel.value)];
+        const base    = qty * it.price;
+        const taxAmt  = base * it.tax / 100;
+        row.querySelector('.price-cell').textContent = `${cur}${it.price.toFixed(2)}`;
+        row.querySelector('.tax-cell').textContent   = `${it.tax}%`;
+        row.querySelector('.total-cell').textContent = `${cur}${(base+taxAmt).toFixed(2)}`;
     }
-    const item = itemsList[select.value]; 
-    const qty = parseInt(qtyInput.value)||0;
-    const total = qty * item.price * (1 + item.tax/100);
-    priceCell.innerText = `${currency}${item.price.toFixed(2)}`; 
-    taxCell.innerText = `${item.tax}%`; 
-    totalCell.innerText = `${currency}${total.toFixed(2)}`;
     updateTotals();
 }
 
-function updateTotals(){
-    const rows = document.querySelectorAll('#items-body tr'); 
-    let subtotal=0, taxTotal=0;
-    rows.forEach(row=>{
-        const select=row.querySelector('.item-select'); 
-        if(select.value==="") return;
-        const item=itemsList[select.value]; 
-        const qty=parseInt(row.querySelector('.qty-input').value)||0;
-        subtotal += qty * item.price; 
-        taxTotal += qty * item.price * item.tax/100;
+/* ─────────────────────────────────────────────
+   Totals
+───────────────────────────────────────────── */
+function updateTotals() {
+    let sub = 0, tax = 0;
+    document.querySelectorAll('#items-body tr').forEach(row => {
+        const sel = row.querySelector('.item-select');
+        if (!sel?.value) return;
+        const it  = ITEMS[parseInt(sel.value)];
+        const qty = parseInt(row.querySelector('.qty-input').value) || 0;
+        const base = qty * it.price;
+        const t    = base * it.tax / 100;
+        sub += base; tax += t;
+        row.querySelector('.total-cell').textContent = `${getCurrency()}${(base+t).toFixed(2)}`;
     });
-    const discountPercent=parseFloat(document.getElementById('discount').value)||0;
-    const discountAmount=subtotal*discountPercent/100;
-    const currency = getCurrency();
-    document.getElementById('subtotal').innerText=`${currency}${subtotal.toFixed(2)}`;
-    document.getElementById('tax-total').innerText=`${currency}${taxTotal.toFixed(2)}`;
-    document.getElementById('grand-total').innerText=`${currency}${(subtotal+taxTotal-discountAmount).toFixed(2)}`;
+    const disc    = parseFloat(document.getElementById('discount').value || 0);
+    const discAmt = sub * (disc / 100);
+    const grand   = sub + tax - discAmt;
+    const cur     = getCurrency();
+    document.getElementById('subtotal').textContent   = `${cur}${sub.toFixed(2)}`;
+    document.getElementById('tax-total').textContent  = `${cur}${tax.toFixed(2)}`;
+    document.getElementById('grand-total').textContent = `${cur}${grand.toFixed(2)}`;
 }
 
-// ==================== Save Invoice ====================
-document.getElementById('shopping-invoice-form').addEventListener('submit', function(e){
-    e.preventDefault();
-    updateTotals(); 
-    const form = e.target;
-    const formData = new FormData(form);
-    const currency = getCurrency();
-
-    const invoice = {
-        logo: logoDataURL,
-        currency: currency,
-        company_name: formData.get('company_name'),
-        company_address: formData.get('company_address'),
-        company_phone: formData.get('company_phone'),
-        company_email: formData.get('company_email'),
-        company_bank: formData.get('company_bank'),
-        customer_name: formData.get('customer_name'),
-        customer_email: formData.get('customer_email'),
-        customer_phone: formData.get('customer_phone'),
-        customer_address: formData.get('customer_address'),
-        invoice_no: formData.get('invoice_no'),
-        date: formData.get('date'),
-        due_date: formData.get('due_date'),
-        payment_terms: formData.get('payment_terms'),
-        discountPercent: parseFloat(formData.get('discount')) || 0,
-        items: [],
-        notes: formData.get('notes'),
-        terms: formData.get('terms'),
-        subtotal: parseFloat(document.getElementById('subtotal').innerText.replace(currency,'')),
-        tax: parseFloat(document.getElementById('tax-total').innerText.replace(currency,'')),
-        grandTotal: parseFloat(document.getElementById('grand-total').innerText.replace(currency,''))
-    };
-
-    document.querySelectorAll('#items-body tr').forEach(row=>{
-        const select=row.querySelector('.item-select'); 
-        if(select.value==="") return;
-        const item=itemsList[select.value]; 
-        const qty=parseInt(row.querySelector('.qty-input').value)||0;
-        const total = qty*item.price*(1+item.tax/100);
-        invoice.items.push({ name:item.name, price:item.price, tax:item.tax, qty, total });
+document.getElementById('currency').addEventListener('change', () => {
+    document.querySelectorAll('#items-body tr').forEach(row => {
+        const sel = row.querySelector('.item-select');
+        if (sel) updateRow(sel);
     });
-
-    invoice.discountAmount = invoice.subtotal * invoice.discountPercent/100;
-    localStorage.setItem('savedInvoice', JSON.stringify(invoice));
-    setTimeout(()=>{ alert('Invoice saved successfully!'); }, 50); 
 });
 
-// ==================== Preview & Download PDF ====================
+/* ─────────────────────────────────────────────
+   Collect form data
+───────────────────────────────────────────── */
+function collectData() {
+    const f = document.getElementById('shopping-invoice-form');
+    const v = n => f.querySelector(`[name="${n}"]`)?.value || '';
+    let sub=0, tax=0;
+    const items = [];
+    document.querySelectorAll('#items-body tr').forEach(row => {
+        const sel = row.querySelector('.item-select');
+        if (!sel?.value) return;
+        const it  = ITEMS[parseInt(sel.value)];
+        const qty = parseInt(row.querySelector('.qty-input').value) || 0;
+        const base = qty * it.price, t = base * it.tax/100;
+        sub += base; tax += t;
+        items.push({ name: it.name, qty, price: it.price, tax: it.tax, total: base+t });
+    });
+    const disc    = parseFloat(document.getElementById('discount').value || 0);
+    const discAmt = sub * (disc/100);
+    return {
+        logo: logoDataURL,
+        currency: getCurrency(),
+        company_name: v('company_name'), company_address: v('company_address'),
+        company_phone: v('company_phone'), company_email: v('company_email'),
+        company_bank: v('company_bank'),
+        customer_name: v('customer_name'), customer_email: v('customer_email'),
+        customer_phone: v('customer_phone'), customer_address: v('customer_address'),
+        customer_gstin: v('customer_gstin'),
+        invoice_no: v('invoice_no'), date: v('date'), due_date: v('due_date'),
+        payment_terms: v('payment_terms'),
+        notes: v('notes'), terms: v('terms'),
+        items, subtotal: sub, taxTotal: tax,
+        discountPercent: disc, discountAmount: discAmt,
+        grandTotal: sub + tax - discAmt
+    };
+}
+
+/* ─────────────────────────────────────────────
+   Preview & Download
+───────────────────────────────────────────── */
+function getTemplate() {
+    return document.querySelector('input[name="invoice_template"]:checked')?.value || 'classic';
+}
+
 function previewInvoice() {
-    const invoice = JSON.parse(localStorage.getItem('savedInvoice'));
-    if (!invoice) { alert("No saved invoice!"); return; }
-    const doc = generatePDF(invoice);
-    window.open(doc.output('bloburl'));
+    const data = collectData();
+    if (!data.items.length) return alert('Add at least one item before previewing.');
+    const doc = buildPDF(data, getTemplate());
+    window.open(doc.output('bloburl'), '_blank');
 }
 
 function downloadPDF() {
-    const invoice = JSON.parse(localStorage.getItem('savedInvoice'));
-    if (!invoice) { alert("No saved invoice!"); return; }
-    const doc = generatePDF(invoice);
-    doc.save(`Invoice_${invoice.customer_name}.pdf`);
+    const data = collectData();
+    if (!data.items.length) return alert('Add at least one item before downloading.');
+    const doc  = buildPDF(data, getTemplate());
+    const name = (data.customer_name || 'invoice').replace(/\s+/g,'_').replace(/[^\w_-]/g,'');
+    doc.save(`Invoice_${name}.pdf`);
 }
 
-// ==================== PDF Generator ====================
-function generatePDF(invoice) {
+/* ─────────────────────────────────────────────
+   PDF Builder
+───────────────────────────────────────────── */
+function imgType(url) {
+    if (!url) return null;
+    const m = url.match(/^data:image\/(png|jpeg|jpg|gif);base64,/i);
+    if (!m) return null;
+    return m[1].toUpperCase() === 'JPG' ? 'JPEG' : m[1].toUpperCase();
+}
+
+function buildPDF(d, tpl) {
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    const margin = 15;
-    let y = margin;
-    const currency = invoice.currency || '₹';
+    const doc = new jsPDF('p','pt','a4');
+    const W = doc.internal.pageSize.getWidth();
+    const H = doc.internal.pageSize.getHeight();
+    const M = 36;
+    const cur = d.currency;
 
-    if(invoice.logo){
-        try { doc.addImage(invoice.logo, 'PNG', margin, y, 30, 30); } 
-        catch(e){ console.error(e); }
+    /* ── CLASSIC ─────────────────────────────── */
+    if (tpl === 'classic') {
+        // Header band
+        doc.setFillColor(30,58,138);
+        doc.rect(0,0,W,70,'F');
+        // Accent strip
+        doc.setFillColor(245,158,11);
+        doc.rect(0,70,W/3,4,'F');
+        doc.setFillColor(239,68,68);
+        doc.rect(W/3,70,W/3,4,'F');
+        doc.setFillColor(16,185,129);
+        doc.rect(2*W/3,70,W/3,4,'F');
+
+        // Logo
+        if (d.logo) {
+            try { doc.addImage(d.logo, imgType(d.logo)||'PNG', M, 12, 50, 46); }
+            catch(e) {}
+        }
+
+        // Company name (header)
+        doc.setTextColor(255,255,255);
+        doc.setFontSize(13); doc.setFont('helvetica','bold');
+        doc.text(d.company_name || 'Company Name', d.logo ? M+58 : M, 30);
+        doc.setFontSize(8); doc.setFont('helvetica','normal');
+        doc.text(d.company_address || '', d.logo ? M+58 : M, 42);
+
+        // INVOICE title
+        doc.setFontSize(26); doc.setFont('helvetica','bold');
+        doc.setTextColor(255,255,255);
+        doc.text('INVOICE', W-M, 46, {align:'right'});
+        doc.setFontSize(9); doc.setFont('helvetica','normal');
+        doc.text(`# ${d.invoice_no}`, W-M, 62, {align:'right'});
+
+        // Body start
+        let y = 90;
+        doc.setTextColor(31,41,55);
+
+        // Bill From / To boxes
+        const boxH = 75;
+        doc.setFillColor(248,250,252);
+        doc.roundedRect(M, y, (W-M*2-10)/2, boxH, 5,5,'F');
+        doc.setDrawColor(226,232,240);
+        doc.roundedRect(M, y, (W-M*2-10)/2, boxH, 5,5,'S');
+        doc.roundedRect(M+(W-M*2-10)/2+10, y, (W-M*2-10)/2, boxH, 5,5,'F');
+        doc.roundedRect(M+(W-M*2-10)/2+10, y, (W-M*2-10)/2, boxH, 5,5,'S');
+
+        const bx1 = M+10, bx2 = M+(W-M*2-10)/2+20;
+        doc.setFontSize(7); doc.setFont('helvetica','bold');
+        doc.setTextColor(100,116,139);
+        doc.text('BILL FROM', bx1, y+12);
+        doc.text('BILL TO',   bx2, y+12);
+        doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.setTextColor(30,58,138);
+        doc.text(d.company_name||'', bx1, y+25, {maxWidth:(W-M*2-10)/2-16});
+        doc.text(d.customer_name||'', bx2, y+25, {maxWidth:(W-M*2-10)/2-16});
+        doc.setFontSize(8.5); doc.setFont('helvetica','normal'); doc.setTextColor(71,85,105);
+        const fr = [`${d.company_address||''}`,`${d.company_phone||''}  ${d.company_email||''}`,d.company_bank||''].filter(Boolean);
+        const to = [`${d.customer_address||''}`,`${d.customer_phone||''}  ${d.customer_email||''}`,d.customer_gstin?`GSTIN: ${d.customer_gstin}`:''].filter(Boolean);
+        doc.text(fr.join('\n'), bx1, y+37, {maxWidth:(W-M*2-10)/2-16});
+        doc.text(to.join('\n'), bx2, y+37, {maxWidth:(W-M*2-10)/2-16});
+
+        // Meta row
+        y += boxH + 10;
+        doc.setFillColor(241,245,249);
+        doc.rect(M, y, W-M*2, 22, 'F');
+        doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(100,116,139);
+        doc.text(`Date: ${d.date||''}`, M+8, y+14);
+        if (d.due_date) doc.text(`Due: ${d.due_date}`, M+130, y+14);
+        doc.text(`Terms: ${d.payment_terms||'Due on Receipt'}`, M+260, y+14);
+        y += 30;
+
+        // Items table
+        doc.autoTable({
+            head: [['#','Item / Product','Qty','Unit Price','Tax','Total']],
+            body: d.items.map((it,i) => [
+                i+1, it.name, String(it.qty),
+                `${cur}${it.price.toFixed(2)}`,
+                `${it.tax}%`,
+                `${cur}${it.total.toFixed(2)}`
+            ]),
+            startY: y,
+            styles: { fontSize:9.5, cellPadding:7 },
+            headStyles: { fillColor:[30,58,138], textColor:255, fontStyle:'bold', fontSize:8.5 },
+            alternateRowStyles: { fillColor:[240,245,255] },
+            columnStyles: { 0:{cellWidth:22}, 2:{halign:'center'}, 3:{halign:'right'}, 4:{halign:'center'}, 5:{halign:'right',fontStyle:'bold'} },
+            margin: { left:M, right:M }
+        });
+
+        // Totals box
+        let ty = doc.lastAutoTable.finalY + 12;
+        const boxW = 200, bx = W-M-boxW;
+        const rows = [
+            ['Subtotal', `${cur}${d.subtotal.toFixed(2)}`],
+            ['Tax', `${cur}${d.taxTotal.toFixed(2)}`],
+        ];
+        if (d.discountPercent) rows.push([`Discount (${d.discountPercent}%)`, `-${cur}${d.discountAmount.toFixed(2)}`]);
+
+        doc.setFillColor(248,250,252);
+        doc.setDrawColor(226,232,240);
+        doc.roundedRect(bx, ty, boxW, rows.length*20+38, 5,5,'FD');
+        rows.forEach((r,i) => {
+            doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(100,116,139);
+            doc.text(r[0], bx+10, ty+14+i*20);
+            doc.setTextColor(31,41,55);
+            doc.text(r[1], bx+boxW-10, ty+14+i*20, {align:'right'});
+        });
+        const gty = ty + rows.length*20+10;
+        doc.setFillColor(30,58,138);
+        doc.roundedRect(bx, gty, boxW, 28, 5,5,'F');
+        doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+        doc.text('GRAND TOTAL', bx+10, gty+17);
+        doc.text(`${cur}${d.grandTotal.toFixed(2)}`, bx+boxW-10, gty+17, {align:'right'});
+
+        // Notes & Terms
+        let ny = ty;
+        if (d.notes) {
+            doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(100,116,139);
+            doc.text('NOTES', M, ny+10);
+            doc.setFont('helvetica','normal'); doc.setTextColor(71,85,105); doc.setFontSize(8.5);
+            doc.text(d.notes, M, ny+22, {maxWidth: bx-M-10});
+            ny += 40;
+        }
+        if (d.terms) {
+            doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(100,116,139);
+            doc.text('TERMS & CONDITIONS', M, ny+10);
+            doc.setFont('helvetica','normal'); doc.setTextColor(71,85,105); doc.setFontSize(8.5);
+            doc.text(d.terms, M, ny+22, {maxWidth: bx-M-10});
+        }
+
+        // Signature
+        const sigY = H - 60;
+        doc.setDrawColor(30,58,138);
+        doc.line(W-M-140, sigY, W-M, sigY);
+        doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(100,116,139);
+        doc.text('Authorized Signatory', W-M-70, sigY+10, {align:'center'});
+
+        // Footer bar
+        doc.setFillColor(30,58,138);
+        doc.rect(0, H-20, W, 20, 'F');
+        doc.setTextColor(255,255,255); doc.setFontSize(7.5); doc.setFont('helvetica','normal');
+        doc.text('Thank you for your business!', M, H-8);
+        doc.text(`${d.company_name||''}`, W-M, H-8, {align:'right'});
     }
-    y += 35;
 
-    // Invoice Info
-    doc.setFontSize(12); doc.setFont("helvetica", "bold");
-    doc.text(`Invoice #${invoice.invoice_no}`, 140, 25);
-    doc.setFontSize(10); doc.setFont("helvetica", "normal");
-    doc.text(`Date: ${invoice.date}`, 140, 32);
-    doc.text(`Due Date: ${invoice.due_date}`, 140, 38);
-    doc.text(`Payment Terms: ${invoice.payment_terms}`, 140, 44);
+    /* ── MODERN ──────────────────────────────── */
+    else if (tpl === 'modern') {
+        // Dark header
+        doc.setFillColor(15,23,42);
+        doc.rect(0,0,W,80,'F');
+        doc.setFillColor(59,130,246);
+        doc.rect(0,80,W,5,'F');
 
-    // Bill From / To
-    y += 10;
-    doc.setFontSize(10); doc.setFont("helvetica", "bold");
-    doc.text("Bill From:", margin, y); 
-    doc.text("Bill To:", 110, y); y += 6;
-    doc.setFont("helvetica", "normal");
-    doc.text(invoice.company_name, margin, y); 
-    doc.text(invoice.customer_name, 110, y); y += 6;
-    doc.text(invoice.company_address, margin, y); 
-    doc.text(invoice.customer_address, 110, y); y += 6;
-    doc.text(`Phone: ${invoice.company_phone} | Email: ${invoice.company_email}`, margin, y);
-    doc.text(`Phone: ${invoice.customer_phone} | Email: ${invoice.customer_email}`, 110, y); 
-    y += 10;
+        // INVOICE text
+        doc.setFontSize(28); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+        doc.text('INVOICE', M, 46);
+        doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(148,163,184);
+        doc.text(`# ${d.invoice_no}  |  ${d.date||''}`, M, 62);
 
-    const itemTableData = invoice.items.map(item => [
-        item.name,
-        item.qty,
-        `${currency}${Number(item.price).toFixed(2)}`,
-        `${Number(item.tax).toFixed(0)}%`,
-        `${currency}${Number(item.total).toFixed(2)}`
-    ]);
+        // Logo + company
+        if (d.logo) {
+            try { doc.addImage(d.logo, imgType(d.logo)||'PNG', W-M-60, 15, 50, 50); }
+            catch(e){}
+        }
+        if (!d.logo) {
+            doc.setFontSize(9); doc.setTextColor(203,213,225);
+            doc.text(d.company_name||'', W-M, 35, {align:'right'});
+        }
 
-    doc.autoTable({ startY: y, head: [['Item','Qty','Price','Tax','Total']], body: itemTableData, theme: 'grid', margin: { left: margin, right: margin } });
-    const finalY = doc.lastAutoTable.finalY + 5;
+        let y = 100;
+        doc.setTextColor(15,23,42);
 
-    // Totals
-    doc.setFont("helvetica", "bold");
-    doc.text(`Subtotal: ${currency}${invoice.subtotal.toFixed(2)}`, 140, finalY);
-    doc.text(`Tax: ${currency}${invoice.tax.toFixed(2)}`, 140, finalY+6);
-    doc.text(`Discount: ${currency}${invoice.discountAmount.toFixed(2)}`, 140, finalY+12);
-    doc.text(`GRAND TOTAL: ${currency}${invoice.grandTotal.toFixed(2)}`, 140, finalY+18);
+        // Parties
+        doc.setFillColor(240,247,255);
+        doc.roundedRect(M, y, (W-M*2-8)/2, 70, 6,6,'F');
+        doc.setFillColor(240,253,244);
+        doc.roundedRect(M+(W-M*2-8)/2+8, y, (W-M*2-8)/2, 70, 6,6,'F');
 
-    // Notes & Terms
-    doc.setFont("helvetica", "normal");
-    doc.text(`Notes: ${invoice.notes || ""}`, margin, finalY+28);
-    doc.text(`Terms: ${invoice.terms || ""}`, margin, finalY+36);
+        doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(59,130,246);
+        doc.text('FROM', M+8, y+13);
+        doc.setTextColor(16,185,129);
+        doc.text('BILL TO', M+(W-M*2-8)/2+16, y+13);
+
+        doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.setTextColor(15,23,42);
+        doc.text(d.company_name||'', M+8, y+24, {maxWidth:(W-M*2-8)/2-14});
+        doc.text(d.customer_name||'', M+(W-M*2-8)/2+16, y+24, {maxWidth:(W-M*2-8)/2-14});
+
+        doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(71,85,105);
+        doc.text([d.company_address||'',d.company_phone||'',d.company_email||''].filter(Boolean).join('\n'),
+            M+8, y+36, {maxWidth:(W-M*2-8)/2-14});
+        doc.text([d.customer_address||'',d.customer_phone||'',d.customer_email||''].filter(Boolean).join('\n'),
+            M+(W-M*2-8)/2+16, y+36, {maxWidth:(W-M*2-8)/2-14});
+
+        y += 80;
+        doc.autoTable({
+            head: [['#','Item','Qty','Price','Tax','Total']],
+            body: d.items.map((it,i) => [i+1, it.name, it.qty, `${cur}${it.price.toFixed(2)}`, `${it.tax}%`, `${cur}${it.total.toFixed(2)}`]),
+            startY: y,
+            styles: { fontSize:9.5, cellPadding:7 },
+            headStyles: { fillColor:[15,23,42], textColor:[255,255,255], fontStyle:'bold' },
+            alternateRowStyles: { fillColor:[248,250,252] },
+            columnStyles: { 2:{halign:'center'}, 3:{halign:'right'}, 4:{halign:'center'}, 5:{halign:'right',fontStyle:'bold'} },
+            margin: {left:M,right:M}
+        });
+
+        let gy = doc.lastAutoTable.finalY + 12;
+        doc.setFillColor(29,78,216);
+        doc.roundedRect(W-M-180, gy, 180, 36, 6,6,'F');
+        doc.setFontSize(12); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+        doc.text('GRAND TOTAL', W-M-170, gy+16);
+        doc.text(`${cur}${d.grandTotal.toFixed(2)}`, W-M-10, gy+16, {align:'right'});
+        doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(147,197,253);
+        doc.text(`Sub: ${cur}${d.subtotal.toFixed(2)}   Tax: ${cur}${d.taxTotal.toFixed(2)}${d.discountPercent?`   Disc: ${d.discountPercent}%`:''}`, W-M-170, gy+28);
+
+        // Thank you
+        doc.setFillColor(15,23,42);
+        doc.rect(0, H-24, W, 24,'F');
+        doc.setFontSize(8); doc.setFont('helvetica','italic'); doc.setTextColor(148,163,184);
+        doc.text('Thank you for choosing us — we look forward to serving you again!', W/2, H-10, {align:'center'});
+    }
+
+    /* ── MINIMAL ─────────────────────────────── */
+    else {
+        // Top border
+        doc.setFillColor(17,24,39);
+        doc.rect(0,0,W,4,'F');
+        let y = 30;
+        doc.setFontSize(26); doc.setFont('times','bold'); doc.setTextColor(17,24,39);
+        doc.text('Invoice', M, y+12);
+
+        // Invoice # top right
+        doc.setFontSize(10); doc.setFont('times','normal'); doc.setTextColor(107,114,128);
+        doc.text(`# ${d.invoice_no}`, W-M, y+6, {align:'right'});
+        doc.text(d.date||'', W-M, y+18, {align:'right'});
+        if (d.logo) {
+            try { doc.addImage(d.logo, imgType(d.logo)||'PNG', W-M-55, y+22, 45, 30); }
+            catch(e){}
+        }
+
+        y += 40;
+        // Thick rule
+        doc.setDrawColor(17,24,39); doc.setLineWidth(1.5);
+        doc.line(M, y, W-M, y);
+        y += 14;
+
+        // Parties
+        doc.setFontSize(7.5); doc.setFont('helvetica','bold'); doc.setTextColor(136,136,136);
+        doc.text('ISSUED BY', M, y); doc.text('BILLED TO', W/2+8, y);
+        doc.setFontSize(10); doc.setFont('times','bold'); doc.setTextColor(17,24,39);
+        doc.text(d.company_name||'', M, y+12); doc.text(d.customer_name||'', W/2+8, y+12);
+        doc.setFontSize(8.5); doc.setFont('times','normal'); doc.setTextColor(85,85,85);
+        doc.text([d.company_address||'',d.company_phone||''].filter(Boolean).join('\n'), M, y+22, {maxWidth:W/2-M-8});
+        doc.text([d.customer_address||'',d.customer_phone||'',d.customer_email||''].filter(Boolean).join('\n'), W/2+8, y+22, {maxWidth:W/2-M-8});
+        y += 56;
+
+        doc.setDrawColor(204,204,204); doc.setLineWidth(0.5);
+        doc.line(M, y, W-M, y);
+        y += 10;
+
+        doc.autoTable({
+            head: [['#','Item / Service','Qty','Price','Tax','Total']],
+            body: d.items.map((it,i) => [i+1, it.name, it.qty, `${cur}${it.price.toFixed(2)}`, `${it.tax}%`, `${cur}${it.total.toFixed(2)}`]),
+            startY: y,
+            styles: { font:'times', fontSize:10, cellPadding:6 },
+            headStyles: { fillColor:255, textColor:[17,24,39], lineColor:[17,24,39], lineWidth:0.8, fontStyle:'bold', fontSize:8 },
+            bodyStyles: { lineColor:[220,220,220], lineWidth:0.3 },
+            alternateRowStyles: { fillColor:[250,250,250] },
+            columnStyles: { 2:{halign:'center'}, 3:{halign:'right'}, 4:{halign:'center'}, 5:{halign:'right',fontStyle:'bold'} },
+            margin: {left:M,right:M}
+        });
+
+        let gy = doc.lastAutoTable.finalY + 14;
+        const tw = 200, tx = W-M-tw;
+        doc.setDrawColor(17,24,39); doc.setLineWidth(0.5);
+        doc.line(tx, gy, W-M, gy);
+
+        const trows = [
+            ['Subtotal', `${cur}${d.subtotal.toFixed(2)}`],
+            ['Tax', `${cur}${d.taxTotal.toFixed(2)}`],
+        ];
+        if (d.discountPercent) trows.push([`Discount ${d.discountPercent}%`, `-${cur}${d.discountAmount.toFixed(2)}`]);
+        trows.forEach((r,i) => {
+            doc.setFontSize(9.5); doc.setFont('times','normal'); doc.setTextColor(85,85,85);
+            doc.text(r[0], tx+6, gy+14+i*16);
+            doc.text(r[1], W-M, gy+14+i*16, {align:'right'});
+        });
+        const finalRow = gy + trows.length*16 + 14;
+        doc.setLineWidth(1.2); doc.setDrawColor(17,24,39);
+        doc.line(tx, finalRow, W-M, finalRow);
+        doc.setFontSize(12); doc.setFont('times','bold'); doc.setTextColor(17,24,39);
+        doc.text('Total Due', tx+6, finalRow+14);
+        doc.text(`${cur}${d.grandTotal.toFixed(2)}`, W-M, finalRow+14, {align:'right'});
+
+        if (d.notes) {
+            doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(136,136,136);
+            doc.text(d.notes, M, finalRow+36, {maxWidth:tx-M-10});
+        }
+
+        doc.setFontSize(8); doc.setFont('times','italic'); doc.setTextColor(153,153,153);
+        doc.text('Thank you for your business.', W/2, H-18, {align:'center'});
+        doc.setLineWidth(0.5); doc.setDrawColor(200,200,200);
+        doc.line(M, H-26, W-M, H-26);
+    }
 
     return doc;
 }
+
+/* ─────────────────────────────────────────────
+   Init: add first row
+───────────────────────────────────────────── */
+addItemRow();
 </script>
-
-
-
 
 {% endblock %}

@@ -1,358 +1,507 @@
 {% extends 'invoice/base.html' %}
-{% block title %}Shopping Invoice{% endblock %}
+{% block title %}Hospital Invoice{% endblock %}
 
 {% block content %}
- <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
- <script src="https://cdn.tailwindcss.com"></script>
-<h2 class="text-2xl font-bold mb-6 text-gray-800">Create Hospital Invoice</h2>
-   
-<body class="bg-gray-100 p-6">
-<form id="hospital-invoice-form" class="bg-white p-6 rounded shadow-md space-y-6">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
-    <!-- ==================== Logo & Hospital Info ==================== -->
-    <div class="flex space-x-6 items-center">
-        <div id="dropbox" class="border-2 border-dashed border-gray-400 p-4 w-32 h-32 flex items-center justify-center cursor-pointer">
-            <input type="file" class="hidden" accept="image/*">
-            <span>Upload Logo</span>
-        </div>
-        <img id="preview-logo" class="hidden w-32 h-32 object-contain" alt="Hospital Logo">
-        <div class="flex-1 space-y-2">
-            <label>Hospital / Clinic Name</label>
-            <input type="text" name="hospital_name" class="border p-2 w-64" required>
-
-            <label>Address</label>
-            <textarea name="hospital_address" class="border p-2 w-64" required></textarea>
-
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label>Contact Number</label>
-                    <input type="text" name="hospital_contact" class="border p-2 w-full" required>
-                </div>
-                <div>
-                    <label>Email</label>
-                    <input type="email" name="hospital_email" class="border p-2 w-full" required>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label>GSTIN / PAN</label>
-                    <input type="text" name="hospital_gstin" class="border p-2 w-full">
-                </div>
-                <div>
-                    <label>Registration Number</label>
-                    <input type="text" name="hospital_reg_no" class="border p-2 w-full">
-                </div>
-            </div>
-        </div>
+<!-- Page header -->
+<div class="flex items-center gap-3 mb-6">
+    <div class="bg-teal-600 text-white w-10 h-10 rounded-xl flex items-center justify-center text-lg shadow">
+        <i class="fa-solid fa-hospital"></i>
     </div>
-
-    <!-- ==================== Patient Info ==================== -->
-    <div class="space-y-2">
-        <h2 class="font-bold text-lg">Patient Information</h2>
-        <div class="grid grid-cols-2 gap-4">
-            <div>
-                <label>Patient Name</label>
-                <input type="text" name="patient_name" class="border p-2 w-full" required>
-            </div>
-            <div>
-                <label>Patient ID / MRN</label>
-                <input type="text" name="patient_id" class="border p-2 w-full" required>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-3 gap-4">
-            <div>
-                <label>Age</label>
-                <input type="number" name="patient_age" class="border p-2 w-full">
-            </div>
-            <div>
-                <label>Gender</label>
-                <select name="patient_gender" class="border p-2 w-full">
-                    <option value="">Select</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                </select>
-            </div>
-            <div>
-                <label>Contact Number</label>
-                <input type="text" name="patient_contact" class="border p-2 w-full">
-            </div>
-        </div>
-
-        <label>Address</label>
-        <textarea name="patient_address" class="border p-2 w-full"></textarea>
-
-        <div class="grid grid-cols-2 gap-4">
-            <div>
-                <label>Doctor / Consultant Name</label>
-                <input type="text" name="doctor_name" class="border p-2 w-full">
-            </div>
-            <div>
-                <label>Admission Date</label>
-                <input type="date" name="admission_date" class="border p-2 w-full">
-            </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-            <div>
-                <label>Discharge Date</label>
-                <input type="date" name="discharge_date" class="border p-2 w-full">
-            </div>
-            <div>
-                <label>Ward / Room / Bed</label>
-                <input type="text" name="ward_room_bed" class="border p-2 w-full">
-            </div>
-        </div>
-    </div>
-
-    <!-- ==================== Invoice Metadata ==================== -->
-    <div class="grid grid-cols-2 gap-4">
-        <div>
-            <label>Invoice Number</label>
-            <input type="text" name="invoice_no" class="border p-2 w-full" readonly value="HOSP-INV-001">
-        </div>
-        <div>
-            <label>Invoice Date</label>
-            <input type="date" name="invoice_date" class="border p-2 w-full" required>
-        </div>
-        <div>
-            <label>Payment Due Date / Terms</label>
-            <input type="text" name="payment_terms" class="border p-2 w-full">
-        </div>
-        <div>
-            <label>Reference / Appointment Number</label>
-            <input type="text" name="reference_no" class="border p-2 w-full">
-        </div>
-    </div>
-
-    <!-- ==================== Services & Items Table ==================== -->
     <div>
-        <h2 class="font-bold text-lg mb-2">Services & Items</h2>
-        <table class="w-full border-collapse border">
-            <thead class="bg-gray-200">
-                <tr>
-                    <th class="border px-2 py-1">Service / Item</th>
-                    <th class="border px-2 py-1">Code / CPT</th>
-                    <th class="border px-2 py-1">Quantity / Units</th>
-                    <th class="border px-2 py-1">Rate / Unit Price</th>
-                    <th class="border px-2 py-1">Discount</th>
-                    <th class="border px-2 py-1">Tax / GST</th>
-                    <th class="border px-2 py-1">Total</th>
-                    <th class="border px-2 py-1">Action</th>
+        <h1 class="text-2xl font-extrabold text-gray-900">Hospital / Medical Invoice</h1>
+        <p class="text-sm text-gray-500">Create professional medical billing invoices with patient details.</p>
+    </div>
+</div>
+
+<form id="hospital-invoice-form" class="space-y-6">
+
+<!-- ── Hospital Info ─────────────────────────── -->
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+    <div class="flex flex-col md:flex-row gap-6 items-start">
+        <!-- Logo -->
+        <div class="flex-shrink-0">
+            <p class="text-xs font-semibold text-gray-500 mb-2">Hospital Logo</p>
+            <div id="dropbox"
+                 class="w-32 h-32 border-2 border-dashed border-teal-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-teal-500 hover:bg-teal-50 transition bg-gray-50 relative">
+                <input type="file" accept="image/*" class="hidden" id="logo-file">
+                <img id="preview-logo" class="hidden absolute inset-0 w-full h-full object-contain p-2 rounded-xl" alt="Logo">
+                <i class="fa-solid fa-hospital text-2xl text-teal-300 mb-1"></i>
+                <span class="text-xs text-gray-400 text-center px-2">Upload Logo</span>
+            </div>
+        </div>
+
+        <!-- Hospital details -->
+        <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="md:col-span-2">
+                <label class="block text-xs font-semibold text-gray-500 mb-1">Hospital / Clinic Name <span class="text-red-500">*</span></label>
+                <input type="text" name="hospital_name" placeholder="e.g. City Multispecialty Hospital"
+                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400 outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 mb-1">Registration Number</label>
+                <input type="text" name="hospital_reg_no" placeholder="HOSP-12345"
+                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400 outline-none font-mono">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 mb-1">Address</label>
+                <input type="text" name="hospital_address" placeholder="Hospital Address"
+                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400 outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 mb-1">Contact Number <span class="text-red-500">*</span></label>
+                <input type="text" name="hospital_contact" placeholder="+91 98765 43210"
+                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400 outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 mb-1">Email</label>
+                <input type="email" name="hospital_email" placeholder="info@hospital.com"
+                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400 outline-none">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Patient Info ───────────────────────────── -->
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+    <h3 class="text-sm font-bold text-gray-700 flex items-center gap-2 mb-4">
+        <i class="fa-solid fa-user-injured text-teal-500"></i> Patient Information
+    </h3>
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Patient Full Name <span class="text-red-500">*</span></label>
+            <input type="text" name="patient_name" placeholder="Jane Doe"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400 outline-none">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Patient ID / MRN</label>
+            <input type="text" name="patient_id" placeholder="P-20250001"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400 outline-none font-mono">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Age</label>
+            <input type="number" name="patient_age" placeholder="30" min="0" max="150"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400 outline-none">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Gender</label>
+            <select name="patient_gender" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400 outline-none">
+                <option value="">Select</option>
+                <option>Male</option>
+                <option>Female</option>
+                <option>Other</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Doctor / Consultant</label>
+            <input type="text" name="doctor_name" placeholder="Dr. Sharma"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400 outline-none">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Ward / Room / Bed</label>
+            <input type="text" name="ward_room" placeholder="Ward A, Bed 12"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400 outline-none">
+        </div>
+    </div>
+</div>
+
+<!-- ── Invoice Meta ───────────────────────────── -->
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+    <h3 class="text-sm font-bold text-gray-700 flex items-center gap-2 mb-4">
+        <i class="fa-solid fa-file-invoice text-teal-500"></i> Invoice Details
+    </h3>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Invoice No.</label>
+            <input type="text" name="invoice_no" value="HOSP-INV-001" readonly
+                class="w-full border border-gray-100 rounded-lg px-3 py-2 text-sm bg-gray-50 font-mono text-gray-600">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Invoice Date <span class="text-red-500">*</span></label>
+            <input type="date" name="invoice_date"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400 outline-none">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Admission Date</label>
+            <input type="date" name="admission_date"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400 outline-none">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Discharge Date</label>
+            <input type="date" name="discharge_date"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400 outline-none">
+        </div>
+    </div>
+</div>
+
+<!-- ── Services Table ────────────────────────── -->
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <h3 class="text-sm font-bold text-gray-700 flex items-center gap-2">
+            <i class="fa-solid fa-stethoscope text-teal-500"></i> Services &amp; Items
+        </h3>
+        <button type="button" onclick="addServiceRow()"
+            class="inline-flex items-center gap-1.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold px-3 py-2 rounded-lg transition">
+            <i class="fa-solid fa-plus"></i> Add Service
+        </button>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="bg-teal-50 border-b border-teal-100 text-left">
+                    <th class="px-4 py-3 text-xs font-semibold text-teal-700">Service / Item</th>
+                    <th class="px-4 py-3 text-xs font-semibold text-teal-700 text-center w-20">Qty</th>
+                    <th class="px-4 py-3 text-xs font-semibold text-teal-700 text-right w-28">Rate (₹)</th>
+                    <th class="px-4 py-3 text-xs font-semibold text-teal-700 text-right w-28">Total (₹)</th>
+                    <th class="px-4 py-3 text-xs font-semibold text-teal-700 text-center w-16"></th>
                 </tr>
             </thead>
-            <tbody id="items-body">
-                <!-- JS will dynamically add rows here -->
-            </tbody>
+            <tbody id="services-body" class="divide-y divide-gray-50"></tbody>
         </table>
-        <button type="button" onclick="addItemRow()" class="mt-2 px-4 py-2 bg-blue-600 text-white rounded">Add Service / Item</button>
     </div>
+</div>
 
-    <!-- ==================== Summary Section ==================== -->
-    <div class="grid grid-cols-2 gap-4">
-        <div></div>
-        <div class="space-y-2">
-            <div class="flex justify-between">
-                <span>Subtotal</span><span id="subtotal">₹0.00</span>
+<!-- ── Summary + Payment ──────────────────────── -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Summary -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <h3 class="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-calculator text-teal-500"></i> Bill Summary
+        </h3>
+        <div class="space-y-2 text-sm">
+            <div class="flex justify-between text-gray-600">
+                <span>Subtotal</span><span id="subtotal" class="font-medium text-gray-800">₹0.00</span>
             </div>
-            <div class="flex justify-between">
-                <span>Discount / Insurance</span><span id="discount-amount">₹0.00</span>
+            <div class="flex justify-between text-gray-600">
+                <span>Tax (if applicable)</span><span id="tax-total" class="font-medium text-gray-800">₹0.00</span>
             </div>
-            <div class="flex justify-between">
-                <span>Tax / GST</span><span id="tax-total">₹0.00</span>
-            </div>
-            <div class="flex justify-between font-bold">
-                <span>Grand Total</span><span id="grand-total">₹0.00</span>
+            <div class="flex justify-between font-bold text-base border-t border-gray-200 pt-3 mt-2">
+                <span>Grand Total</span>
+                <span id="grand-total" class="text-teal-600 text-lg">₹0.00</span>
             </div>
         </div>
     </div>
 
-    <!-- ==================== Payment Details ==================== -->
-    <div class="space-y-2">
-        <h2 class="font-bold text-lg">Payment Details</h2>
-        <div class="grid grid-cols-2 gap-4">
-            <div>
-                <label>Payment Method</label>
-                <select name="payment_method" class="border p-2 w-full">
-                    <option value="">Select</option>
-                    <option value="Cash">Cash</option>
-                    <option value="Card">Card</option>
-                    <option value="Online">Online</option>
-                    <option value="Insurance">Insurance</option>
-                </select>
-            </div>
-            <div>
-                <label>Advance Payment / Deposit</label>
-                <input type="number" name="advance_payment" class="border p-2 w-full">
-            </div>
+    <!-- Payment -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
+        <h3 class="text-sm font-bold text-gray-700 flex items-center gap-2">
+            <i class="fa-solid fa-credit-card text-teal-500"></i> Payment Details
+        </h3>
+        <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Payment Method</label>
+            <select name="payment_method" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400 outline-none">
+                <option value="">Select</option>
+                <option>Cash</option>
+                <option>Card / UPI</option>
+                <option>Online Transfer</option>
+                <option>Insurance</option>
+            </select>
         </div>
         <div>
-            <label>Balance / Amount Due</label>
-            <input type="number" name="balance_due" class="border p-2 w-full" readonly>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Insurance Provider</label>
+            <input type="text" name="insurance_provider" placeholder="e.g. Star Health"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400 outline-none">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Advance Payment (₹)</label>
+            <input type="number" name="advance_payment" value="0" min="0"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400 outline-none"
+                oninput="updateBalance()">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Balance Due (₹)</label>
+            <input type="number" name="balance_due" readonly
+                class="w-full border border-gray-100 rounded-lg px-3 py-2 text-sm bg-gray-50 font-bold text-teal-700">
         </div>
     </div>
+</div>
 
-    <!-- ==================== Notes / Footer ==================== -->
-    <div class="space-y-2">
-        <label>Notes / Thank You</label>
-        <textarea name="notes" class="border p-2 w-full">Get well soon! Thank you for choosing XYZ Hospital.</textarea>
-        <label>Terms & Conditions</label>
-        <textarea name="terms" class="border p-2 w-full">No refund after discharge. Authorized signature required.</textarea>
-    </div>
+<!-- ── Notes ──────────────────────────────────── -->
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-3">
+    <h3 class="text-sm font-bold text-gray-700 flex items-center gap-2">
+        <i class="fa-solid fa-note-sticky text-yellow-500"></i> Notes &amp; Terms
+    </h3>
+    <textarea name="notes" rows="2" placeholder="Get well soon! Thank you for choosing us."
+        class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400 outline-none resize-none"></textarea>
+    <textarea name="terms" rows="2" placeholder="Terms & Conditions: All payments are due at discharge unless prior arrangement is made."
+        class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400 outline-none resize-none"></textarea>
+</div>
 
-    <div class="flex space-x-4">
-        <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded">Save Invoice</button>
-        <button type="button" onclick="previewInvoice()" class="px-4 py-2 bg-blue-600 text-white rounded">Preview PDF</button>
-        <button type="button" onclick="downloadPDF()" class="px-4 py-2 bg-yellow-600 text-white rounded">Download PDF</button>
-    </div>
+<!-- ── Actions ───────────────────────────────── -->
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-wrap gap-3 items-center justify-end">
+    <button type="button" onclick="previewInvoice()"
+        class="inline-flex items-center gap-2 bg-white border border-gray-200 hover:border-teal-400 text-gray-700 hover:text-teal-600 font-semibold text-sm px-4 py-2.5 rounded-xl transition">
+        <i class="fa-solid fa-eye"></i> Preview PDF
+    </button>
+    <button type="button" onclick="downloadPDF()"
+        class="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-semibold text-sm px-5 py-2.5 rounded-xl shadow transition">
+        <i class="fa-solid fa-file-pdf"></i> Download PDF
+    </button>
+</div>
+
 </form>
 
 <script>
-// ========== Services & Items ==========
-function addItemRow(name = '', code = '', qty = 1, rate = 0, discount = 0, tax = 0) {
-    const tbody = document.getElementById("items-body");
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-        <td class="border px-2 py-1"><input type="text" value="${name}" placeholder="Service / Item" class="border p-1 w-full service-name" onchange="updateTotals()"></td>
-        <td class="border px-2 py-1"><input type="text" value="${code}" placeholder="Code / CPT" class="border p-1 w-full service-code" onchange="updateTotals()"></td>
-        <td class="border px-2 py-1"><input type="number" value="${qty}" min="1" class="border p-1 w-16 qty" onchange="updateTotals()"></td>
-        <td class="border px-2 py-1"><input type="number" value="${rate}" min="0" class="border p-1 w-20 rate" onchange="updateTotals()"></td>
-        <td class="border px-2 py-1"><input type="number" value="${discount}" min="0" class="border p-1 w-20 discount" onchange="updateTotals()"></td>
-        <td class="border px-2 py-1"><input type="number" value="${tax}" min="0" class="border p-1 w-16 tax" onchange="updateTotals()"></td>
-        <td class="border px-2 py-1 total">₹0.00</td>
-        <td class="border px-2 py-1 text-center"><button type="button" onclick="removeRow(this)" class="text-red-600">Remove</button></td>
-    `;
-    tbody.appendChild(tr);
-    updateTotals();
+/* ── Logo ────────────────────────────────────── */
+let logoDataURL = '';
+const dropbox   = document.getElementById('dropbox');
+const fileInput = document.getElementById('logo-file');
+const previewLg = document.getElementById('preview-logo');
+dropbox.addEventListener('click', () => fileInput.click());
+dropbox.addEventListener('dragover', e => { e.preventDefault(); dropbox.classList.add('border-teal-500'); });
+dropbox.addEventListener('dragleave', () => dropbox.classList.remove('border-teal-500'));
+dropbox.addEventListener('drop', e => { e.preventDefault(); dropbox.classList.remove('border-teal-500'); if(e.dataTransfer.files[0]) loadLogo(e.dataTransfer.files[0]); });
+fileInput.addEventListener('change', e => { if (e.target.files[0]) loadLogo(e.target.files[0]); });
+function loadLogo(f) {
+    const r = new FileReader();
+    r.onload = ev => { logoDataURL=ev.target.result; previewLg.src=logoDataURL; previewLg.classList.remove('hidden'); };
+    r.readAsDataURL(f);
 }
 
-function removeRow(button) {
-    button.closest("tr").remove();
-    updateTotals();
+/* ── Service rows ────────────────────────────── */
+function addServiceRow(name='', qty=1, rate=0) {
+    const tbody = document.getElementById('services-body');
+    const row   = document.createElement('tr');
+    row.className = 'hover:bg-teal-50 transition';
+    row.innerHTML = `
+      <td class="px-4 py-2">
+        <input type="text" value="${name}" placeholder="e.g. Consultation, Blood Test, X-Ray"
+          class="svc-name w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-teal-400 outline-none" oninput="recalc()">
+      </td>
+      <td class="px-4 py-2">
+        <input type="number" value="${qty}" min="1"
+          class="svc-qty w-16 border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-center focus:ring-2 focus:ring-teal-400 outline-none" oninput="recalc()">
+      </td>
+      <td class="px-4 py-2">
+        <input type="number" value="${rate}" min="0"
+          class="svc-rate w-24 border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-right focus:ring-2 focus:ring-teal-400 outline-none" oninput="recalc()">
+      </td>
+      <td class="px-4 py-2 text-right svc-total font-semibold text-gray-900 text-sm">₹0.00</td>
+      <td class="px-4 py-2 text-center">
+        <button type="button" onclick="this.closest('tr').remove();recalc()" class="text-red-400 hover:text-red-600">
+          <i class="fa-solid fa-trash text-xs"></i>
+        </button>
+      </td>`;
+    tbody.appendChild(row);
+    recalc();
 }
 
-// ========== Calculation ==========
-function updateTotals() {
-    let subtotal = 0, discountTotal = 0, taxTotal = 0;
+function recalc() {
+    let sub = 0;
+    document.querySelectorAll('#services-body tr').forEach(row => {
+        const qty  = parseFloat(row.querySelector('.svc-qty').value)  || 0;
+        const rate = parseFloat(row.querySelector('.svc-rate').value) || 0;
+        const tot  = qty * rate;
+        row.querySelector('.svc-total').textContent = `₹${tot.toFixed(2)}`;
+        sub += tot;
+    });
+    document.getElementById('subtotal').textContent    = `₹${sub.toFixed(2)}`;
+    document.getElementById('grand-total').textContent = `₹${sub.toFixed(2)}`;
+    updateBalance();
+}
 
-    document.querySelectorAll("#items-body tr").forEach(tr => {
-        const qty = parseFloat(tr.querySelector(".qty").value) || 0;
-        const rate = parseFloat(tr.querySelector(".rate").value) || 0;
-        const discount = parseFloat(tr.querySelector(".discount").value) || 0;
-        const tax = parseFloat(tr.querySelector(".tax").value) || 0;
+function updateBalance() {
+    const grand  = parseFloat(document.getElementById('grand-total').textContent.replace('₹','')) || 0;
+    const adv    = parseFloat(document.querySelector('[name="advance_payment"]').value) || 0;
+    document.querySelector('[name="balance_due"]').value = (grand - adv).toFixed(2);
+}
 
-        const total = (qty * rate - discount) + ((qty * rate - discount) * tax / 100);
-        tr.querySelector(".total").innerText = `₹${total.toFixed(2)}`;
+/* ── Collect form ────────────────────────────── */
+function collectHospital() {
+    const f = document.getElementById('hospital-invoice-form');
+    const v = n => f.querySelector(`[name="${n}"]`)?.value || '';
+    const items = [];
+    document.querySelectorAll('#services-body tr').forEach(row => {
+        const name = row.querySelector('.svc-name').value;
+        const qty  = parseFloat(row.querySelector('.svc-qty').value)  || 0;
+        const rate = parseFloat(row.querySelector('.svc-rate').value) || 0;
+        if (name || rate) items.push({ name: name||'Service', qty, rate, total: qty*rate });
+    });
+    const grand = parseFloat(document.getElementById('grand-total').textContent.replace('₹','')) || 0;
+    return {
+        logo: logoDataURL,
+        hospital_name: v('hospital_name'), hospital_reg_no: v('hospital_reg_no'),
+        hospital_address: v('hospital_address'), hospital_contact: v('hospital_contact'), hospital_email: v('hospital_email'),
+        patient_name: v('patient_name'), patient_id: v('patient_id'),
+        patient_age: v('patient_age'), patient_gender: v('patient_gender'),
+        doctor_name: v('doctor_name'), ward_room: v('ward_room'),
+        invoice_no: v('invoice_no'), invoice_date: v('invoice_date'),
+        admission_date: v('admission_date'), discharge_date: v('discharge_date'),
+        payment_method: v('payment_method'), insurance_provider: v('insurance_provider'),
+        advance: parseFloat(v('advance_payment'))||0,
+        balance: parseFloat(v('balance_due'))||0,
+        notes: v('notes'), terms: v('terms'),
+        items, grandTotal: grand
+    };
+}
 
-        subtotal += qty * rate;
-        discountTotal += discount;
-        taxTotal += (qty * rate - discount) * tax / 100;
+function previewInvoice() {
+    const d = collectHospital();
+    if (!d.items.length) return alert('Add at least one service before previewing.');
+    window.open(buildHospitalPDF(d).output('bloburl'), '_blank');
+}
+
+function downloadPDF() {
+    const d = collectHospital();
+    if (!d.items.length) return alert('Add at least one service before downloading.');
+    const name = (d.patient_name || 'medical_invoice').replace(/\s+/g,'_');
+    buildHospitalPDF(d).save(`Medical_Invoice_${name}.pdf`);
+}
+
+/* ── PDF Builder (Medical / Teal theme) ──────── */
+function imgType(url) {
+    if (!url) return null;
+    const m = url.match(/^data:image\/(png|jpeg|jpg);base64,/i);
+    return m ? (m[1].toUpperCase()==='JPG'?'JPEG':m[1].toUpperCase()) : null;
+}
+
+function buildHospitalPDF(d) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p','pt','a4');
+    const W = doc.internal.pageSize.getWidth();
+    const H = doc.internal.pageSize.getHeight();
+    const M = 36;
+
+    // ── HEADER (teal) ──────────────────────────
+    doc.setFillColor(13,148,136);   // teal-600
+    doc.rect(0,0,W,72,'F');
+    // Red-cross decoration
+    doc.setFillColor(255,255,255);
+    doc.setFillColor(220,38,38);
+    // Horizontal bar of cross
+    doc.rect(W-M-40, 20, 28, 10, 'F');
+    // Vertical bar of cross
+    doc.rect(W-M-32, 12, 10, 28, 'F');
+
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(20); doc.setFont('helvetica','bold');
+    doc.text('MEDICAL INVOICE', M + (d.logo ? 56 : 0), 32);
+    doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(204,251,241);
+    doc.text(d.hospital_name || 'Hospital Name', M + (d.logo ? 56 : 0), 46);
+    doc.text(`${d.hospital_contact||''}  |  ${d.hospital_email||''}`, M + (d.logo ? 56 : 0), 58);
+
+    // Logo
+    if (d.logo) {
+        try { doc.addImage(d.logo, imgType(d.logo)||'PNG', M, 10, 48, 52); }
+        catch(e) {}
+    }
+
+    // Accent strip
+    doc.setFillColor(245,158,11);
+    doc.rect(0, 72, W, 4, 'F');
+
+    let y = 90;
+    doc.setTextColor(17,24,39);
+
+    // ── INVOICE META ───────────────────────────
+    doc.setFillColor(240,253,250);
+    doc.setDrawColor(204,251,241);
+    doc.roundedRect(M, y, W-M*2, 30, 5,5,'FD');
+    doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(13,148,136);
+    doc.text(`Invoice #: ${d.invoice_no}`, M+10, y+12);
+    doc.text(`Date: ${d.invoice_date||'N/A'}`, M+140, y+12);
+    if (d.admission_date) doc.text(`Admitted: ${d.admission_date}`, M+260, y+12);
+    if (d.discharge_date) doc.text(`Discharged: ${d.discharge_date}`, M+380, y+12);
+    if (d.hospital_reg_no) {
+        doc.setFontSize(7.5); doc.setFont('helvetica','normal'); doc.setTextColor(71,85,105);
+        doc.text(`Reg. No: ${d.hospital_reg_no}`, M+10, y+22);
+    }
+    y += 40;
+
+    // ── PATIENT INFO BOX ───────────────────────
+    doc.setFillColor(248,250,252);
+    doc.setDrawColor(226,232,240);
+    doc.roundedRect(M, y, W-M*2, 72, 6,6,'FD');
+    doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(13,148,136);
+    doc.text('PATIENT INFORMATION', M+10, y+13);
+    doc.setLineWidth(0.5); doc.setDrawColor(204,251,241);
+    doc.line(M+10, y+16, W-M-10, y+16);
+
+    const ph = [
+        ['Patient Name', d.patient_name||'—'],
+        ['Patient ID',   d.patient_id||'—'],
+        ['Age / Gender', `${d.patient_age||'—'} / ${d.patient_gender||'—'}`],
+        ['Doctor',       d.doctor_name||'—'],
+        ['Ward / Room',  d.ward_room||'—'],
+    ];
+    const col1 = [ph[0],ph[1],ph[2]], col2 = [ph[3],ph[4]];
+    let ry = y+24;
+    col1.forEach(([label,val]) => {
+        doc.setFontSize(7.5); doc.setFont('helvetica','bold'); doc.setTextColor(100,116,139);
+        doc.text(label, M+10, ry);
+        doc.setFont('helvetica','normal'); doc.setTextColor(17,24,39); doc.setFontSize(8.5);
+        doc.text(val, M+80, ry);
+        ry += 14;
+    });
+    ry = y+24;
+    col2.forEach(([label,val]) => {
+        doc.setFontSize(7.5); doc.setFont('helvetica','bold'); doc.setTextColor(100,116,139);
+        doc.text(label, W/2+10, ry);
+        doc.setFont('helvetica','normal'); doc.setTextColor(17,24,39); doc.setFontSize(8.5);
+        doc.text(val, W/2+80, ry);
+        ry += 14;
+    });
+    y += 82;
+
+    // ── SERVICES TABLE ─────────────────────────
+    doc.autoTable({
+        head: [['#','Service / Item','Qty','Rate (₹)','Total (₹)']],
+        body: d.items.map((it,i) => [i+1, it.name, it.qty, `₹${it.rate.toFixed(2)}`, `₹${it.total.toFixed(2)}`]),
+        startY: y,
+        styles: { fontSize:9.5, cellPadding:7 },
+        headStyles: { fillColor:[13,148,136], textColor:255, fontStyle:'bold' },
+        alternateRowStyles: { fillColor:[240,253,250] },
+        columnStyles: { 0:{cellWidth:24}, 2:{halign:'center'}, 3:{halign:'right'}, 4:{halign:'right',fontStyle:'bold'} },
+        margin: {left:M,right:M}
     });
 
-    const grandTotal = subtotal + taxTotal - discountTotal;
-    document.getElementById("subtotal").innerText = `₹${subtotal.toFixed(2)}`;
-    document.getElementById("discount-amount").innerText = `₹${discountTotal.toFixed(2)}`;
-    document.getElementById("tax-total").innerText = `₹${taxTotal.toFixed(2)}`;
-    document.getElementById("grand-total").innerText = `₹${grandTotal.toFixed(2)}`;
+    let gy = doc.lastAutoTable.finalY + 12;
 
-    const advance = parseFloat(document.querySelector('[name="advance_payment"]').value) || 0;
-    document.querySelector('[name="balance_due"]').value = (grandTotal - advance).toFixed(2);
-}
+    // ── TOTALS ─────────────────────────────────
+    doc.setFillColor(13,148,136);
+    doc.roundedRect(W-M-200, gy, 200, 32, 6,6,'F');
+    doc.setFontSize(12); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+    doc.text('GRAND TOTAL', W-M-190, gy+19);
+    doc.text(`₹${d.grandTotal.toFixed(2)}`, W-M-10, gy+19, {align:'right'});
 
-// Update balance when advance payment changes
-document.querySelector('[name="advance_payment"]').addEventListener("input", updateTotals);
+    // Payment details
+    gy += 42;
+    doc.setFillColor(255,251,235);
+    doc.setDrawColor(253,230,138);
+    doc.roundedRect(M, gy, W-M*2, 40, 5,5,'FD');
+    doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(161,98,7);
+    doc.text('PAYMENT DETAILS', M+10, gy+12);
+    doc.setFont('helvetica','normal'); doc.setTextColor(107,114,128);
+    doc.text(`Method: ${d.payment_method||'—'}   |   Insurance: ${d.insurance_provider||'N/A'}   |   Advance: ₹${d.advance.toFixed(2)}   |   Balance Due: ₹${d.balance.toFixed(2)}`, M+10, gy+26);
 
-// ========== Logo Upload ==========
-const dropbox = document.getElementById('dropbox');
-const previewLogo = document.getElementById('preview-logo');
-dropbox.addEventListener('click', () => dropbox.querySelector('input').click());
-dropbox.querySelector('input').addEventListener('change', function() {
-    const file = this.files[0];
-    if(file){
-        const reader = new FileReader();
-        reader.onload = e => {
-            previewLogo.src = e.target.result;
-            previewLogo.classList.remove('hidden');
-        }
-        reader.readAsDataURL(file);
-    }
-});
-
-// ========== PDF Generation ==========
-function downloadPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF('p', 'pt', 'a4');
-
-    // ========== Bill From ==========
-    const hospitalName = document.querySelector('[name="hospital_name"]').value;
-    const hospitalAddress = document.querySelector('[name="hospital_address"]').value;
-    const hospitalContact = document.querySelector('[name="hospital_contact"]').value;
-    const hospitalEmail = document.querySelector('[name="hospital_email"]').value;
-
-    doc.setFontSize(14);
-    doc.text("Bill From:", 40, 40);
-    doc.setFontSize(12);
-    doc.text(`${hospitalName}`, 40, 60);
-    doc.text(`${hospitalAddress}`, 40, 75);
-    doc.text(`Contact: ${hospitalContact}`, 40, 90);
-    doc.text(`Email: ${hospitalEmail}`, 40, 105);
-
-    // ========== Bill To ==========
-    const patientName = document.querySelector('[name="patient_name"]').value;
-    const patientID = document.querySelector('[name="patient_id"]').value;
-    const invoiceNo = document.querySelector('[name="invoice_no"]').value;
-    const invoiceDate = document.querySelector('[name="invoice_date"]').value;
-
-    doc.setFontSize(14);
-    doc.text("Bill To:", 300, 40);
-    doc.setFontSize(12);
-    doc.text(`Name: ${patientName}`, 300, 60);
-    doc.text(`Patient ID: ${patientID}`, 300, 75);
-    doc.text(`Invoice No: ${invoiceNo}`, 300, 90);
-    doc.text(`Invoice Date: ${invoiceDate}`, 300, 105);
-
-    // ========== Items Table ==========
-    doc.autoTable({ html: '#items-body', startY: 130, theme: 'grid' });
-
-    // ========== Totals ==========
-    const subtotal = document.getElementById("subtotal").innerText;
-    const discount = document.getElementById("discount-amount").innerText;
-    const tax = document.getElementById("tax-total").innerText;
-    const grandTotal = document.getElementById("grand-total").innerText;
-    const advance = parseFloat(document.querySelector('[name="advance_payment"]').value) || 0;
-    const balance = parseFloat(document.querySelector('[name="balance_due"]').value) || 0;
-
-    doc.text(`Subtotal: ${subtotal}`, 400, doc.lastAutoTable.finalY + 20);
-    doc.text(`Discount: ${discount}`, 400, doc.lastAutoTable.finalY + 35);
-    doc.text(`Tax: ${tax}`, 400, doc.lastAutoTable.finalY + 50);
-    doc.text(`Grand Total: ${grandTotal}`, 400, doc.lastAutoTable.finalY + 65);
-    doc.text(`Advance Payment: ₹${advance.toFixed(2)}`, 400, doc.lastAutoTable.finalY + 80);
-    doc.text(`Balance Due: ₹${balance.toFixed(2)}`, 400, doc.lastAutoTable.finalY + 95);
-
-    // ========== Notes ==========
-    const notes = document.querySelector('[name="notes"]').value;
-    doc.text(`Notes: ${notes}`, 40, doc.lastAutoTable.finalY + 120);
-
-    // ========== Logo ==========
-    if(previewLogo.src){
-        doc.addImage(previewLogo.src, 'PNG', 450, 20, 100, 50);
+    // Notes
+    if (d.notes || d.terms) {
+        gy += 50;
+        doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(100,116,139);
+        if (d.notes)  { doc.text('Notes:', M, gy); doc.setFont('helvetica','normal'); doc.setTextColor(71,85,105); doc.setFontSize(8.5); doc.text(d.notes, M+40, gy, {maxWidth:W-M*2-40}); gy+=14; }
+        if (d.terms)  { doc.setFont('helvetica','bold'); doc.text('Terms:', M, gy); doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.text(d.terms, M+40, gy, {maxWidth:W-M*2-40}); }
     }
 
-    doc.save("hospital_invoice.pdf");
+    // Signature line
+    const sigY = H-50;
+    doc.setDrawColor(13,148,136); doc.setLineWidth(1);
+    doc.line(W-M-150, sigY, W-M, sigY);
+    doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(100,116,139);
+    doc.text('Authorized Signatory', W-M-75, sigY+10, {align:'center'});
+
+    // Footer
+    doc.setFillColor(13,148,136);
+    doc.rect(0, H-24, W, 24, 'F');
+    doc.setFontSize(7.5); doc.setFont('helvetica','italic'); doc.setTextColor(255,255,255);
+    doc.text('Thank you for choosing our healthcare services. Wishing you a speedy recovery!', W/2, H-10, {align:'center'});
+
+    return doc;
 }
 
-// ========== Form Submission ==========
-document.getElementById("hospital-invoice-form").addEventListener("submit", function(e){
-    e.preventDefault();
-    alert("Invoice data saved! You can preview or download PDF.");
-});
-
-// Initialize first empty row
-addItemRow();
+/* ── Init ──────────────────────────────────────── */
+addServiceRow('Consultation Fee', 1, 500);
+addServiceRow();
 </script>
-
-
 {% endblock %}

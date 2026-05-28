@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+@page {
+    size: A4;
+    margin: 0;
+    @bottom-right {
+        content: "Page " counter(page) " of " counter(pages);
+        font-size: 8pt;
+        color: #9ca3af;
+        padding-bottom: 8mm;
+        padding-right: 32px;
+    }
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 10pt;
+    color: #0f172a;
+    background: #fff;
+}
+
+/* ── HERO HEADER ────────────────────────────────── */
+.header-hero {
+    background: #0f172a;
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+}
+.header-hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 200px; height: 200px;
+    background: rgba(59,130,246,0.15);
+    border-radius: 50%;
+}
+.header-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -30px; left: 80px;
+    width: 120px; height: 120px;
+    background: rgba(245,158,11,0.12);
+    border-radius: 50%;
+}
+.header-top {
+    background: #3b82f6;
+    padding: 10px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.invoice-word {
+    font-size: 26pt;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+}
+.invoice-number-badge {
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 9pt;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+.header-bottom {
+    padding: 16px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.company-block { display: flex; align-items: center; gap: 12px; }
+.logo-wrap {
+    width: 48px; height: 48px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+}
+.logo-wrap img { max-width: 44px; max-height: 44px; object-fit: contain; }
+.company-name { font-size: 14pt; font-weight: 800; color: #fff; }
+.company-sub   { font-size: 8pt; color: #93c5fd; margin-top: 1px; }
+.meta-right { text-align: right; }
+.meta-row  { font-size: 8.5pt; color: #cbd5e1; line-height: 1.8; }
+.meta-row strong { color: #fff; }
+
+/* ── STRIP ──────────────────────────────────────── */
+.color-strip { height: 4px; background: linear-gradient(to right, #3b82f6, #f59e0b, #10b981); }
+
+/* ── BODY ───────────────────────────────────────── */
+.body { padding: 26px 32px; }
+
+/* ── PARTIES ────────────────────────────────────── */
+.parties { display: flex; gap: 14px; margin-bottom: 24px; }
+.party-card {
+    flex: 1;
+    border-radius: 10px;
+    padding: 14px 16px;
+    border: 1px solid #e2e8f0;
+}
+.party-card.from { border-left: 4px solid #3b82f6; background: #f0f7ff; }
+.party-card.to   { border-left: 4px solid #10b981; background: #f0fdf4; }
+.party-type {
+    font-size: 7.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+.party-card.from .party-type { color: #3b82f6; }
+.party-card.to   .party-type { color: #10b981; }
+.party-name { font-size: 12pt; font-weight: 700; color: #0f172a; margin-bottom: 3px; }
+.party-info { font-size: 8.5pt; color: #475569; line-height: 1.7; }
+.gstin {
+    display: inline-block;
+    font-family: monospace;
+    font-size: 7.5pt;
+    background: #dbeafe;
+    color: #1d4ed8;
+    padding: 2px 7px;
+    border-radius: 3px;
+    margin-top: 4px;
+}
+
+/* ── TABLE ──────────────────────────────────────── */
+.items-table { width: 100%; border-collapse: collapse; margin-bottom: 22px; }
+.items-table thead tr { background: #0f172a; }
+.items-table thead th {
+    padding: 10px 12px;
+    color: #e2e8f0;
+    font-size: 8pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    text-align: left;
+}
+.items-table thead th.right { text-align: right; }
+.items-table thead th.center { text-align: center; }
+.items-table tbody td {
+    padding: 9px 12px;
+    font-size: 9.5pt;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+}
+.items-table tbody td.right { text-align: right; }
+.items-table tbody td.center { text-align: center; }
+.items-table tbody tr:nth-child(even) td { background: #f8fafc; }
+.items-table tbody td.name { font-weight: 600; color: #0f172a; }
+.items-table tbody td.total { font-weight: 700; color: #0f172a; }
+.tax-chip {
+    background: #dbeafe; color: #1d4ed8;
+    padding: 1px 7px; border-radius: 20px;
+    font-size: 8pt; font-weight: 600;
+}
+
+/* ── TOTALS BLOCK ───────────────────────────────── */
+.totals-wrap { display: flex; justify-content: flex-end; margin-bottom: 24px; }
+.totals-card {
+    width: 270px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+.totals-line {
+    display: flex;
+    justify-content: space-between;
+    padding: 7px 16px;
+    font-size: 9.5pt;
+    border-bottom: 1px solid #e8eef5;
+}
+.totals-line .lbl { color: #64748b; }
+.totals-line .val { font-weight: 500; color: #1e293b; }
+.totals-line.disc .val { color: #dc2626; }
+.totals-grand {
+    background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 16px;
+    font-size: 12pt;
+    font-weight: 800;
+}
+
+/* ── FOOTER ─────────────────────────────────────── */
+.footer-strip {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    padding-top: 16px;
+    border-top: 1px dashed #cbd5e1;
+    margin-top: 12px;
+}
+.notes-wrap .notes-head {
+    font-size: 8pt; font-weight: 700;
+    color: #64748b; text-transform: uppercase;
+    letter-spacing: 0.8px; margin-bottom: 4px;
+}
+.notes-wrap .notes-body { font-size: 8.5pt; color: #475569; line-height: 1.6; }
+.sig-wrap { text-align: center; min-width: 130px; }
+.sig-line { border-top: 1.5px solid #3b82f6; margin-bottom: 4px; width: 130px; }
+.sig-label { font-size: 8pt; color: #64748b; }
+.sig-name  { font-size: 8pt; font-weight: 700; color: #1e3a8a; margin-top: 2px; }
+
+.thanks-block {
+    margin-top: 20px;
+    text-align: center;
+    padding: 10px;
+    background: linear-gradient(to right, #eff6ff, #f0fdf4);
+    border-radius: 8px;
+    font-size: 9pt;
+    color: #1d4ed8;
+    font-style: italic;
+    border: 1px solid #dbeafe;
+}
+</style>
+</head>
+<body>
+
+<!-- HERO HEADER -->
+<div class="header-hero">
+    <div class="header-top">
+        <div class="invoice-word">INVOICE</div>
+        <div class="invoice-number-badge"># {{ invoice.invoice_no }}</div>
+    </div>
+    <div class="header-bottom">
+        <div class="company-block">
+            {% if invoice.logo %}
+            <div class="logo-wrap"><img src="{{ invoice.logo.url }}" alt="Logo"></div>
+            {% endif %}
+            <div>
+                <div class="company-name">{{ invoice.bill_from }}</div>
+                <div class="company-sub">{{ invoice.get_invoice_type_display }} Invoice</div>
+            </div>
+        </div>
+        <div class="meta-right">
+            <div class="meta-row"><strong>Date:</strong> {{ invoice.date }}</div>
+            <div class="meta-row"><strong>Type:</strong> {{ invoice.get_invoice_type_display }}</div>
+        </div>
+    </div>
+</div>
+<div class="color-strip"></div>
+
+<!-- BODY -->
+<div class="body">
+
+    <!-- Parties -->
+    <div class="parties">
+        <div class="party-card from">
+            <div class="party-type">From</div>
+            <div class="party-name">{{ invoice.bill_from }}</div>
+            {% if invoice.authorized_person %}
+            <div class="party-info">{{ invoice.authorized_person }}</div>
+            {% endif %}
+        </div>
+        <div class="party-card to">
+            <div class="party-type">Bill To</div>
+            <div class="party-name">{{ invoice.customer.name }}</div>
+            <div class="party-info">
+                {{ invoice.customer.address }}<br>
+                {{ invoice.customer.email }} &nbsp;|&nbsp; {{ invoice.customer.phone }}
+            </div>
+            {% if invoice.customer.gstin %}
+            <div class="gstin">GSTIN: {{ invoice.customer.gstin }}</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Items -->
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th style="width:28px">#</th>
+                <th>Description</th>
+                <th class="center" style="width:45px">Qty</th>
+                <th class="right" style="width:80px">Rate</th>
+                <th class="center" style="width:55px">Tax</th>
+                <th class="right" style="width:90px">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td class="name">{{ item.product.name }}</td>
+                <td class="center">{{ item.quantity }}</td>
+                <td class="right">₹{{ item.price|floatformat:2 }}</td>
+                <td class="center"><span class="tax-chip">{{ item.tax }}%</span></td>
+                <td class="right total">₹{{ item.total|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Totals -->
+    <div class="totals-wrap">
+        <div class="totals-card">
+            <div class="totals-line">
+                <span class="lbl">Subtotal</span>
+                <span class="val">₹{{ subtotal|floatformat:2 }}</span>
+            </div>
+            <div class="totals-line">
+                <span class="lbl">Tax</span>
+                <span class="val">₹{{ total_tax|floatformat:2 }}</span>
+            </div>
+            {% if invoice.discount %}
+            <div class="totals-line disc">
+                <span class="lbl">Discount</span>
+                <span class="val">− ₹{{ invoice.discount|floatformat:2 }}</span>
+            </div>
+            {% endif %}
+            <div class="totals-grand">
+                <span>GRAND TOTAL</span>
+                <span>₹{{ total_amount|floatformat:2 }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-strip">
+        <div class="notes-wrap">
+            {% if invoice.notes %}
+            <div class="notes-head">Notes</div>
+            <div class="notes-body">{{ invoice.notes }}</div>
+            {% endif %}
+        </div>
+        <div class="sig-wrap">
+            <div class="sig-line"></div>
+            <div class="sig-label">Authorized Signatory</div>
+            {% if invoice.authorized_person %}
+            <div class="sig-name">{{ invoice.authorized_person }}</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="thanks-block">
+        ✦ Thank you for choosing us — we look forward to serving you again! ✦
+    </div>
+
+</div>
+</body>
+</html>

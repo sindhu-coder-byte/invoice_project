@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: invoice-gen
+    env: python
+    region: singapore
+    plan: free
+    buildCommand: "chmod +x build.sh && ./build.sh"
+    startCommand: "gunicorn invoice_project.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.12
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: RENDER
+        value: "true"

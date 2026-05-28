@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+@page {
+    size: A4;
+    margin: 0;
+    @bottom-center {
+        content: "Page " counter(page) " of " counter(pages);
+        font-size: 8pt;
+        color: #9ca3af;
+        padding-bottom: 8mm;
+    }
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 10pt;
+    color: #1f2937;
+    background: #fff;
+}
+
+/* ── HEADER BAND ───────────────────────────────── */
+.header {
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+    padding: 24px 32px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    color: #fff;
+}
+.header .brand {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.header .logo-img {
+    max-height: 50px;
+    max-width: 120px;
+    object-fit: contain;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.15);
+    padding: 3px;
+}
+.header .company-name {
+    font-size: 16pt;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+.header .company-sub {
+    font-size: 8.5pt;
+    opacity: 0.85;
+}
+.header .invoice-meta {
+    text-align: right;
+}
+.header .invoice-title {
+    font-size: 28pt;
+    font-weight: 900;
+    letter-spacing: 4px;
+    color: rgba(255,255,255,0.95);
+    text-transform: uppercase;
+    line-height: 1;
+}
+.header .invoice-ref {
+    font-size: 9pt;
+    opacity: 0.85;
+    margin-top: 6px;
+    line-height: 1.8;
+}
+
+/* ── ACCENT LINE ───────────────────────────────── */
+.accent-bar {
+    height: 4px;
+    background: linear-gradient(to right, #f59e0b, #ef4444, #f59e0b);
+}
+
+/* ── BODY WRAPPER ──────────────────────────────── */
+.body { padding: 24px 32px; }
+
+/* ── PARTIES BOX ───────────────────────────────── */
+.parties {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+.party-box {
+    flex: 1;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 14px 16px;
+}
+.party-label {
+    font-size: 7.5pt;
+    font-weight: bold;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #e2e8f0;
+}
+.party-name {
+    font-size: 12pt;
+    font-weight: bold;
+    color: #1e3a8a;
+    margin-bottom: 4px;
+}
+.party-detail {
+    font-size: 8.5pt;
+    color: #475569;
+    line-height: 1.7;
+}
+.gstin-badge {
+    display: inline-block;
+    font-size: 7.5pt;
+    font-family: monospace;
+    background: #e0e7ff;
+    color: #3730a3;
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-top: 4px;
+}
+
+/* ── ITEMS TABLE ───────────────────────────────── */
+.items-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    font-size: 9.5pt;
+}
+.items-table thead tr {
+    background: #1e3a8a;
+    color: #fff;
+}
+.items-table thead th {
+    padding: 9px 12px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 8.5pt;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+.items-table thead th.right { text-align: right; }
+.items-table thead th.center { text-align: center; }
+.items-table tbody tr:nth-child(even) { background: #f0f4ff; }
+.items-table tbody tr:nth-child(odd) { background: #fff; }
+.items-table tbody td {
+    padding: 9px 12px;
+    border-bottom: 1px solid #e8edf5;
+    vertical-align: top;
+}
+.items-table tbody td.right { text-align: right; }
+.items-table tbody td.center { text-align: center; }
+.items-table tbody td.product-name { font-weight: 600; color: #1e293b; }
+.tax-badge {
+    background: #dbeafe;
+    color: #1d4ed8;
+    padding: 1px 6px;
+    border-radius: 20px;
+    font-size: 8pt;
+    font-weight: 600;
+}
+
+/* ── TOTALS ────────────────────────────────────── */
+.totals-section {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 24px;
+}
+.totals-box {
+    width: 260px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+.totals-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 7px 14px;
+    font-size: 9.5pt;
+    border-bottom: 1px solid #f1f5f9;
+}
+.totals-row .label { color: #64748b; }
+.totals-row .value { font-weight: 500; color: #1e293b; }
+.totals-row.discount .value { color: #dc2626; }
+.totals-grand {
+    background: #1e3a8a;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 14px;
+    font-size: 11pt;
+    font-weight: bold;
+}
+
+/* ── FOOTER AREA ───────────────────────────────── */
+.footer-area {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px dashed #cbd5e1;
+}
+.notes-section {
+    flex: 1;
+    margin-right: 24px;
+}
+.notes-label {
+    font-size: 8pt;
+    font-weight: bold;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 4px;
+}
+.notes-text {
+    font-size: 8.5pt;
+    color: #475569;
+    line-height: 1.6;
+}
+.signature-box {
+    text-align: center;
+    min-width: 140px;
+}
+.signature-line {
+    border-top: 1px solid #1e3a8a;
+    margin-bottom: 4px;
+    width: 140px;
+}
+.signature-label {
+    font-size: 8pt;
+    color: #475569;
+}
+
+/* ── THANK YOU BAR ─────────────────────────────── */
+.thank-you-bar {
+    margin-top: 24px;
+    background: #f0f4ff;
+    border-left: 4px solid #1e3a8a;
+    padding: 10px 16px;
+    border-radius: 0 6px 6px 0;
+    font-size: 9pt;
+    color: #1e3a8a;
+    font-style: italic;
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+    <div class="brand">
+        {% if invoice.logo %}
+        <img src="{{ invoice.logo.url }}" class="logo-img" alt="Logo">
+        {% endif %}
+        <div class="company-name">{{ invoice.bill_from }}</div>
+        <div class="company-sub">Professional Invoicing</div>
+    </div>
+    <div class="invoice-meta">
+        <div class="invoice-title">INVOICE</div>
+        <div class="invoice-ref">
+            <strong>Invoice No:</strong> {{ invoice.invoice_no }}<br>
+            <strong>Date:</strong> {{ invoice.date }}<br>
+            <strong>Type:</strong> {{ invoice.get_invoice_type_display }}
+        </div>
+    </div>
+</div>
+<div class="accent-bar"></div>
+
+<!-- BODY -->
+<div class="body">
+
+    <!-- Parties -->
+    <div class="parties">
+        <div class="party-box">
+            <div class="party-label">Bill From</div>
+            <div class="party-name">{{ invoice.bill_from }}</div>
+            {% if invoice.authorized_person %}
+            <div class="party-detail">{{ invoice.authorized_person }}</div>
+            {% endif %}
+        </div>
+        <div class="party-box">
+            <div class="party-label">Bill To</div>
+            <div class="party-name">{{ invoice.customer.name }}</div>
+            <div class="party-detail">
+                {{ invoice.customer.address }}<br>
+                {{ invoice.customer.email }}<br>
+                {{ invoice.customer.phone }}
+            </div>
+            {% if invoice.customer.gstin %}
+            <div class="gstin-badge">GSTIN: {{ invoice.customer.gstin }}</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Items Table -->
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th style="width:30px">#</th>
+                <th>Description</th>
+                <th class="center" style="width:50px">Qty</th>
+                <th class="right" style="width:80px">Unit Price</th>
+                <th class="center" style="width:60px">Tax</th>
+                <th class="right" style="width:90px">Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td class="product-name">{{ item.product.name }}</td>
+                <td class="center">{{ item.quantity }}</td>
+                <td class="right">₹{{ item.price|floatformat:2 }}</td>
+                <td class="center"><span class="tax-badge">{{ item.tax }}%</span></td>
+                <td class="right" style="font-weight:600">₹{{ item.total|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Totals -->
+    <div class="totals-section">
+        <div class="totals-box">
+            <div class="totals-row">
+                <span class="label">Subtotal</span>
+                <span class="value">₹{{ subtotal|floatformat:2 }}</span>
+            </div>
+            <div class="totals-row">
+                <span class="label">Tax</span>
+                <span class="value">₹{{ total_tax|floatformat:2 }}</span>
+            </div>
+            {% if invoice.discount %}
+            <div class="totals-row discount">
+                <span class="label">Discount</span>
+                <span class="value">− ₹{{ invoice.discount|floatformat:2 }}</span>
+            </div>
+            {% endif %}
+            <div class="totals-grand">
+                <span>GRAND TOTAL</span>
+                <span>₹{{ total_amount|floatformat:2 }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-area">
+        <div class="notes-section">
+            {% if invoice.notes %}
+            <div class="notes-label">Notes</div>
+            <div class="notes-text">{{ invoice.notes }}</div>
+            {% else %}
+            <div class="notes-text" style="color:#94a3b8;font-style:italic;">No additional notes.</div>
+            {% endif %}
+        </div>
+        <div class="signature-box">
+            <div class="signature-line"></div>
+            <div class="signature-label">Authorized Signatory</div>
+            {% if invoice.authorized_person %}
+            <div style="font-size:8pt;font-weight:600;color:#1e3a8a;margin-top:2px;">{{ invoice.authorized_person }}</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="thank-you-bar">
+        Thank you for your business! We appreciate your trust in us.
+    </div>
+
+</div>
+</body>
+</html>

@@ -2,273 +2,564 @@
 {% block title %}Stationery Invoice{% endblock %}
 
 {% block content %}
-<h2 class="text-2xl font-bold mb-4">Create Stationery Invoice</h2>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
-<form id="stationery-invoice-form" class="space-y-4 bg-white p-6 rounded shadow-md">
-    {% csrf_token %}
-
-    <!-- ==================== Logo & Shop Info ==================== -->
-    <div class="flex space-x-6 items-center mb-4">
-        <div id="dropbox" class="border-2 border-dashed border-gray-400 p-4 w-32 h-32 flex items-center justify-center cursor-pointer">
-            <input type="file" class="hidden" accept="image/*">
-            <span>Upload Logo</span>
-        </div>
-        <img id="preview-logo" class="hidden w-32 h-32 object-contain" alt="Shop Logo">
-        <div class="flex-1 space-y-2">
-            <label>Shop Name</label>
-            <input type="text" name="shop_name" class="border p-2 w-64" placeholder="Enter Shop Name" required>
-
-            <label>Address</label>
-            <textarea name="shop_address" class="border p-2 w-64" placeholder="Enter Address" required></textarea>
-
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label>Contact Number</label>
-                    <input type="text" name="shop_contact" class="border p-2 w-full" placeholder="Enter Contact">
-                </div>
-                <div>
-                    <label>Email</label>
-                    <input type="email" name="shop_email" class="border p-2 w-full" placeholder="Enter Email">
-                </div>
-            </div>
-        </div>
+<!-- Page header -->
+<div class="flex items-center gap-3 mb-6">
+    <div class="bg-amber-500 text-white w-10 h-10 rounded-xl flex items-center justify-center text-lg shadow">
+        <i class="fa-solid fa-pen-ruler"></i>
     </div>
-
-    <!-- ==================== Customer Info ==================== -->
-    <div class="space-y-2">
-        <h2 class="font-bold text-lg">Customer Information</h2>
-        <div class="grid grid-cols-2 gap-4">
-            <div>
-                <label>Customer Name</label>
-                <input type="text" name="customer_name" class="border p-2 w-full" placeholder="Enter Customer Name" required>
-            </div>
-            <div>
-                <label>Customer Contact</label>
-                <input type="text" name="customer_contact" class="border p-2 w-full" placeholder="Enter Contact">
-            </div>
-        </div>
-        <label>Customer Address</label>
-        <textarea name="customer_address" class="border p-2 w-full" placeholder="Enter Address"></textarea>
-    </div>
-
-    <!-- ==================== Invoice Metadata ==================== -->
-    <div class="grid grid-cols-2 gap-4">
-        <div>
-            <label>Invoice Number</label>
-            <input type="text" name="invoice_no" class="border p-2 w-full" readonly value="ST-INV-001">
-        </div>
-        <div>
-            <label>Invoice Date</label>
-            <input type="date" name="invoice_date" class="border p-2 w-full" required>
-        </div>
-    </div>
-
-    <!-- ==================== Products Table ==================== -->
     <div>
-        <h2 class="font-bold text-lg mb-2">Products</h2>
-        <table class="w-full border-collapse border">
-            <thead class="bg-gray-200">
-                <tr>
-                    <th class="border px-2 py-1">Product Name</th>
-                    <th class="border px-2 py-1">Quantity</th>
-                    <th class="border px-2 py-1">Unit Price</th>
-                    <th class="border px-2 py-1">Discount</th>
-                    <th class="border px-2 py-1">Tax %</th>
-                    <th class="border px-2 py-1">Total</th>
-                    <th class="border px-2 py-1">Action</th>
+        <h1 class="text-2xl font-extrabold text-gray-900">Stationery Invoice</h1>
+        <p class="text-sm text-gray-500">Generate invoices for stationery shops, schools, and office supplies.</p>
+    </div>
+</div>
+
+<form id="stationery-invoice-form" class="space-y-6">
+
+<!-- ── Shop Info ──────────────────────────────── -->
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+    <h3 class="text-sm font-bold text-gray-700 flex items-center gap-2 mb-4">
+        <i class="fa-solid fa-store text-amber-500"></i> Shop Information
+    </h3>
+    <div class="flex flex-col md:flex-row gap-6 items-start">
+        <!-- Logo -->
+        <div class="flex-shrink-0">
+            <div id="dropbox"
+                 class="w-32 h-32 border-2 border-dashed border-amber-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-amber-500 hover:bg-amber-50 transition bg-gray-50 relative">
+                <input type="file" accept="image/*" class="hidden" id="logo-file">
+                <img id="preview-logo" class="hidden absolute inset-0 w-full h-full object-contain p-2 rounded-xl" alt="Logo">
+                <i class="fa-solid fa-store text-2xl text-amber-300 mb-1"></i>
+                <span class="text-xs text-gray-400 text-center px-2">Upload Logo</span>
+            </div>
+        </div>
+
+        <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="md:col-span-2">
+                <label class="block text-xs font-semibold text-gray-500 mb-1">Shop Name <span class="text-red-500">*</span></label>
+                <input type="text" name="shop_name" placeholder="e.g. Perfect Stationery Store"
+                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-400 outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 mb-1">Address <span class="text-red-500">*</span></label>
+                <textarea name="shop_address" rows="2" placeholder="Shop Address"
+                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-400 outline-none resize-none"></textarea>
+            </div>
+            <div class="grid grid-rows-2 gap-2">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 mb-1">Contact</label>
+                    <input type="text" name="shop_contact" placeholder="+91 98765 43210"
+                        class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-400 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 mb-1">Email</label>
+                    <input type="email" name="shop_email" placeholder="shop@example.com"
+                        class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-400 outline-none">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Customer + Invoice Meta ───────────────── -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Customer -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-3">
+        <h3 class="text-sm font-bold text-gray-700 flex items-center gap-2">
+            <i class="fa-solid fa-user text-green-500"></i> Customer Information
+        </h3>
+        <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Customer Name <span class="text-red-500">*</span></label>
+            <input type="text" name="customer_name" placeholder="John Doe"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-400 outline-none">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Contact</label>
+            <input type="text" name="customer_contact" placeholder="+91 98765 43210"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-400 outline-none">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Address</label>
+            <textarea name="customer_address" rows="2" placeholder="Customer Address"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-400 outline-none resize-none"></textarea>
+        </div>
+    </div>
+
+    <!-- Invoice meta -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-3">
+        <h3 class="text-sm font-bold text-gray-700 flex items-center gap-2">
+            <i class="fa-solid fa-file-invoice text-amber-500"></i> Invoice Details
+        </h3>
+        <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Invoice No.</label>
+            <input type="text" name="invoice_no" value="ST-INV-001" readonly
+                class="w-full border border-gray-100 rounded-lg px-3 py-2 text-sm bg-gray-50 font-mono text-gray-600">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Invoice Date <span class="text-red-500">*</span></label>
+            <input type="date" name="invoice_date"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-400 outline-none">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Payment Method</label>
+            <select name="payment_method" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-400 outline-none">
+                <option value="">Select</option>
+                <option>Cash</option>
+                <option>Card / UPI</option>
+                <option>Online Transfer</option>
+                <option>Credit</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<!-- ── Products Table ────────────────────────── -->
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <h3 class="text-sm font-bold text-gray-700 flex items-center gap-2">
+            <i class="fa-solid fa-boxes-stacked text-purple-500"></i> Products
+        </h3>
+        <button type="button" onclick="addProductRow()"
+            class="inline-flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold px-3 py-2 rounded-lg transition">
+            <i class="fa-solid fa-plus"></i> Add Product
+        </button>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="bg-amber-50 border-b border-amber-100 text-left">
+                    <th class="px-4 py-3 text-xs font-semibold text-amber-700">Product Name</th>
+                    <th class="px-4 py-3 text-xs font-semibold text-amber-700 text-center w-20">Qty</th>
+                    <th class="px-4 py-3 text-xs font-semibold text-amber-700 text-right w-28">Price (₹)</th>
+                    <th class="px-4 py-3 text-xs font-semibold text-amber-700 text-right w-28">Discount (₹)</th>
+                    <th class="px-4 py-3 text-xs font-semibold text-amber-700 text-center w-20">Tax %</th>
+                    <th class="px-4 py-3 text-xs font-semibold text-amber-700 text-right w-28">Total</th>
+                    <th class="px-4 py-3 text-xs font-semibold text-amber-700 text-center w-16"></th>
                 </tr>
             </thead>
-            <tbody id="products-body">
-                <!-- JS will dynamically add rows -->
-            </tbody>
+            <tbody id="products-body" class="divide-y divide-gray-50"></tbody>
         </table>
-        <button type="button" onclick="addProductRow()" class="mt-2 px-4 py-2 bg-blue-600 text-white rounded">Add Product</button>
     </div>
+</div>
 
-    <!-- ==================== Summary Section ==================== -->
-    <div class="grid grid-cols-2 gap-4 mt-4">
-        <div></div>
-        <div class="space-y-2">
-            <div class="flex justify-between">
-                <span>Subtotal</span><span id="subtotal">₹0.00</span>
-            </div>
-            <div class="flex justify-between">
-                <span>Discount</span><span id="discount-amount">₹0.00</span>
-            </div>
-            <div class="flex justify-between">
-                <span>Tax</span><span id="tax-total">₹0.00</span>
-            </div>
-            <div class="flex justify-between font-bold">
-                <span>Grand Total</span><span id="grand-total">₹0.00</span>
+<!-- ── Summary + Payment ──────────────────────── -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Summary -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <h3 class="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-calculator text-amber-500"></i> Summary
+        </h3>
+        <div class="space-y-2 text-sm">
+            <div class="flex justify-between text-gray-600"><span>Subtotal</span><span id="subtotal" class="font-medium text-gray-800">₹0.00</span></div>
+            <div class="flex justify-between text-gray-600"><span>Discount</span><span id="discount-amount" class="font-medium text-red-500">₹0.00</span></div>
+            <div class="flex justify-between text-gray-600"><span>Tax</span><span id="tax-total" class="font-medium text-gray-800">₹0.00</span></div>
+            <div class="flex justify-between font-bold text-base border-t border-gray-200 pt-3 mt-2">
+                <span>Grand Total</span>
+                <span id="grand-total" class="text-amber-600 text-lg">₹0.00</span>
             </div>
         </div>
     </div>
 
-    <!-- ==================== Payment Details ==================== -->
-    <div class="space-y-2 mt-4">
-        <h2 class="font-bold text-lg">Payment Details</h2>
-        <div class="grid grid-cols-2 gap-4">
-            <div>
-                <label>Payment Method</label>
-                <select name="payment_method" class="border p-2 w-full">
-                    <option value="">Select</option>
-                    <option value="Cash">Cash</option>
-                    <option value="Card">Card</option>
-                    <option value="Online">Online</option>
-                </select>
-            </div>
-            <div>
-                <label>Advance Payment</label>
-                <input type="number" name="advance_payment" class="border p-2 w-full" placeholder="Enter Advance">
-            </div>
+    <!-- Payment details -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-3">
+        <h3 class="text-sm font-bold text-gray-700 flex items-center gap-2">
+            <i class="fa-solid fa-money-bill-wave text-green-500"></i> Payment
+        </h3>
+        <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Advance (₹)</label>
+            <input type="number" name="advance_payment" value="0" min="0"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-400 outline-none"
+                oninput="updateBalance()">
         </div>
         <div>
-            <label>Balance Due</label>
-            <input type="number" name="balance_due" class="border p-2 w-full" readonly>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Balance Due (₹)</label>
+            <input type="number" name="balance_due" readonly
+                class="w-full border border-gray-100 rounded-lg px-3 py-2 text-sm bg-gray-50 font-bold text-amber-700">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Notes</label>
+            <textarea name="notes" rows="2" placeholder="Thank you for your purchase!"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-400 outline-none resize-none"></textarea>
         </div>
     </div>
+</div>
 
-    <!-- ==================== Notes ==================== -->
-    <div class="space-y-2 mt-4">
-        <label>Notes / Thank You</label>
-        <textarea name="notes" class="border p-2 w-full" placeholder="Thank you for your purchase!"></textarea>
-    </div>
+<!-- ── Template + Actions ─────────────────────── -->
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <!-- Template selector -->
+        <div>
+            <p class="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-palette text-pink-500"></i> PDF Template Style
+            </p>
+            <div class="flex gap-3">
+                <label class="cursor-pointer">
+                    <input type="radio" name="invoice_template" value="classic" class="hidden peer" checked>
+                    <div class="border-2 rounded-xl px-4 py-3 text-center min-w-[90px] peer-checked:border-amber-500 peer-checked:bg-amber-50 border-gray-200 hover:border-gray-300 transition">
+                        <i class="fa-solid fa-file-lines text-xl text-amber-500 block mb-1"></i>
+                        <p class="text-xs font-semibold text-gray-700">Classic</p>
+                    </div>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="radio" name="invoice_template" value="modern" class="hidden peer">
+                    <div class="border-2 rounded-xl px-4 py-3 text-center min-w-[90px] peer-checked:border-blue-600 peer-checked:bg-blue-50 border-gray-200 hover:border-gray-300 transition">
+                        <i class="fa-solid fa-file-circle-check text-xl text-blue-600 block mb-1"></i>
+                        <p class="text-xs font-semibold text-gray-700">Modern</p>
+                    </div>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="radio" name="invoice_template" value="dark" class="hidden peer">
+                    <div class="border-2 rounded-xl px-4 py-3 text-center min-w-[90px] peer-checked:border-gray-800 peer-checked:bg-gray-900 border-gray-200 hover:border-gray-300 transition">
+                        <i class="fa-solid fa-moon text-xl text-gray-300 block mb-1"></i>
+                        <p class="text-xs font-semibold text-gray-300 peer-checked:text-white">Dark</p>
+                    </div>
+                </label>
+            </div>
+        </div>
 
-    <div class="flex space-x-4 mt-4">
-        <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded">Save Invoice</button>
-        <button type="button" onclick="previewInvoice()" class="px-4 py-2 bg-blue-600 text-white rounded">Preview PDF</button>
-        <button type="button" onclick="downloadPDF()" class="px-4 py-2 bg-yellow-600 text-white rounded">Download PDF</button>
+        <!-- Action buttons -->
+        <div class="flex flex-wrap gap-2">
+            <button type="button" onclick="previewInvoice()"
+                class="inline-flex items-center gap-2 bg-white border border-gray-200 hover:border-amber-400 text-gray-700 hover:text-amber-600 font-semibold text-sm px-4 py-2.5 rounded-xl transition">
+                <i class="fa-solid fa-eye"></i> Preview
+            </button>
+            <button type="button" onclick="downloadPDF()"
+                class="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold text-sm px-5 py-2.5 rounded-xl shadow transition">
+                <i class="fa-solid fa-file-pdf"></i> Download PDF
+            </button>
+        </div>
     </div>
+</div>
+
 </form>
 
 <script>
-// ==================== Products & Calculation ====================
-function addProductRow(name='', qty=1, rate=0, discount=0, tax=0){
-    const tbody = document.getElementById("products-body");
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-        <td class="border px-2 py-1"><input type="text" value="${name}" placeholder="Product Name" class="border p-1 w-full product-name" onchange="updateTotals()"></td>
-        <td class="border px-2 py-1"><input type="number" value="${qty}" min="1" class="border p-1 w-16 qty" onchange="updateTotals()"></td>
-        <td class="border px-2 py-1"><input type="number" value="${rate}" min="0" class="border p-1 w-20 rate" onchange="updateTotals()"></td>
-        <td class="border px-2 py-1"><input type="number" value="${discount}" min="0" class="border p-1 w-20 discount" onchange="updateTotals()"></td>
-        <td class="border px-2 py-1"><input type="number" value="${tax}" min="0" class="border p-1 w-16 tax" onchange="updateTotals()"></td>
-        <td class="border px-2 py-1 total">₹0.00</td>
-        <td class="border px-2 py-1 text-center"><button type="button" onclick="removeRow(this)" class="text-red-600">Remove</button></td>
-    `;
-    tbody.appendChild(tr);
-    updateTotals();
+/* ── Logo ────────────────────────────────────── */
+let logoDataURL = '';
+const dropbox   = document.getElementById('dropbox');
+const fileInput = document.getElementById('logo-file');
+const previewLg = document.getElementById('preview-logo');
+dropbox.addEventListener('click', () => fileInput.click());
+dropbox.addEventListener('dragover', e => { e.preventDefault(); dropbox.classList.add('border-amber-500'); });
+dropbox.addEventListener('dragleave', () => dropbox.classList.remove('border-amber-500'));
+dropbox.addEventListener('drop', e => { e.preventDefault(); dropbox.classList.remove('border-amber-500'); if(e.dataTransfer.files[0]) loadLogo(e.dataTransfer.files[0]); });
+fileInput.addEventListener('change', e => { if (e.target.files[0]) loadLogo(e.target.files[0]); });
+function loadLogo(f) {
+    const r = new FileReader();
+    r.onload = ev => { logoDataURL=ev.target.result; previewLg.src=logoDataURL; previewLg.classList.remove('hidden'); };
+    r.readAsDataURL(f);
 }
 
-function removeRow(button){
-    button.closest("tr").remove();
-    updateTotals();
+/* ── Product row ─────────────────────────────── */
+function addProductRow(name='', qty=1, price=0, discount=0, tax=0) {
+    const tbody = document.getElementById('products-body');
+    const row   = document.createElement('tr');
+    row.className = 'hover:bg-amber-50 transition';
+    row.innerHTML = `
+      <td class="px-4 py-2">
+        <input type="text" value="${name}" placeholder="Product name"
+          class="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-amber-400 outline-none product-name" oninput="recalc()">
+      </td>
+      <td class="px-4 py-2">
+        <input type="number" value="${qty}" min="1"
+          class="w-16 border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-center focus:ring-2 focus:ring-amber-400 outline-none product-qty" oninput="recalc()">
+      </td>
+      <td class="px-4 py-2">
+        <input type="number" value="${price}" min="0"
+          class="w-24 border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-right focus:ring-2 focus:ring-amber-400 outline-none product-price" oninput="recalc()">
+      </td>
+      <td class="px-4 py-2">
+        <input type="number" value="${discount}" min="0"
+          class="w-24 border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-right focus:ring-2 focus:ring-amber-400 outline-none product-disc" oninput="recalc()">
+      </td>
+      <td class="px-4 py-2">
+        <input type="number" value="${tax}" min="0"
+          class="w-16 border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-center focus:ring-2 focus:ring-amber-400 outline-none product-tax" oninput="recalc()">
+      </td>
+      <td class="px-4 py-2 text-right product-total font-semibold text-gray-900 text-sm">₹0.00</td>
+      <td class="px-4 py-2 text-center">
+        <button type="button" onclick="this.closest('tr').remove();recalc()" class="text-red-400 hover:text-red-600">
+          <i class="fa-solid fa-trash text-xs"></i>
+        </button>
+      </td>`;
+    tbody.appendChild(row);
+    recalc();
 }
 
-function updateTotals(){
-    let subtotal=0, discountTotal=0, taxTotal=0;
-    document.querySelectorAll("#products-body tr").forEach(tr=>{
-        const qty=parseFloat(tr.querySelector(".qty").value)||0;
-        const rate=parseFloat(tr.querySelector(".rate").value)||0;
-        const discount=parseFloat(tr.querySelector(".discount").value)||0;
-        const tax=parseFloat(tr.querySelector(".tax").value)||0;
-
-        const total=(qty*rate-discount)+((qty*rate-discount)*tax/100);
-        tr.querySelector(".total").innerText=`₹${total.toFixed(2)}`;
-
-        subtotal+=qty*rate;
-        discountTotal+=discount;
-        taxTotal+=(qty*rate-discount)*tax/100;
+function recalc() {
+    let sub=0, discTotal=0, taxTotal=0;
+    document.querySelectorAll('#products-body tr').forEach(row => {
+        const qty  = parseFloat(row.querySelector('.product-qty').value)   || 0;
+        const price= parseFloat(row.querySelector('.product-price').value) || 0;
+        const disc = parseFloat(row.querySelector('.product-disc').value)  || 0;
+        const tax  = parseFloat(row.querySelector('.product-tax').value)   || 0;
+        const base = qty * price;
+        const net  = base - disc;
+        const taxAmt = net * tax / 100;
+        const total  = net + taxAmt;
+        row.querySelector('.product-total').textContent = `₹${total.toFixed(2)}`;
+        sub += base; discTotal += disc; taxTotal += taxAmt;
     });
-    const grandTotal=subtotal+taxTotal-discountTotal;
-    document.getElementById("subtotal").innerText=`₹${subtotal.toFixed(2)}`;
-    document.getElementById("discount-amount").innerText=`₹${discountTotal.toFixed(2)}`;
-    document.getElementById("tax-total").innerText=`₹${taxTotal.toFixed(2)}`;
-    document.getElementById("grand-total").innerText=`₹${grandTotal.toFixed(2)}`;
-
-    const advance=parseFloat(document.querySelector('[name="advance_payment"]').value)||0;
-    document.querySelector('[name="balance_due"]').value=(grandTotal-advance).toFixed(2);
+    const grand = sub - discTotal + taxTotal;
+    document.getElementById('subtotal').textContent        = `₹${sub.toFixed(2)}`;
+    document.getElementById('discount-amount').textContent = `₹${discTotal.toFixed(2)}`;
+    document.getElementById('tax-total').textContent       = `₹${taxTotal.toFixed(2)}`;
+    document.getElementById('grand-total').textContent     = `₹${grand.toFixed(2)}`;
+    updateBalance();
 }
-document.querySelector('[name="advance_payment"]').addEventListener("input",updateTotals);
 
-// ==================== Logo Upload ====================
-const dropbox=document.getElementById('dropbox');
-const previewLogo=document.getElementById('preview-logo');
-dropbox.addEventListener('click',()=>dropbox.querySelector('input').click());
-dropbox.querySelector('input').addEventListener('change',function(){
-    const file=this.files[0];
-    if(file){
-        const reader=new FileReader();
-        reader.onload=e=>{
-            previewLogo.src=e.target.result;
-            previewLogo.classList.remove('hidden');
+function updateBalance() {
+    const grand = parseFloat(document.getElementById('grand-total').textContent.replace('₹','')) || 0;
+    const adv   = parseFloat(document.querySelector('[name="advance_payment"]').value) || 0;
+    document.querySelector('[name="balance_due"]').value = (grand - adv).toFixed(2);
+}
+document.querySelector('[name="advance_payment"]').addEventListener('input', updateBalance);
+
+/* ── Collect ─────────────────────────────────── */
+function getTemplate() {
+    return document.querySelector('input[name="invoice_template"]:checked')?.value || 'classic';
+}
+
+function collectStationery() {
+    const f = document.getElementById('stationery-invoice-form');
+    const v = n => f.querySelector(`[name="${n}"]`)?.value || '';
+    const items = [];
+    let sub=0, discT=0, taxT=0;
+    document.querySelectorAll('#products-body tr').forEach(row => {
+        const name = row.querySelector('.product-name').value;
+        const qty  = parseFloat(row.querySelector('.product-qty').value)   || 0;
+        const price= parseFloat(row.querySelector('.product-price').value) || 0;
+        const disc = parseFloat(row.querySelector('.product-disc').value)  || 0;
+        const tax  = parseFloat(row.querySelector('.product-tax').value)   || 0;
+        const base = qty*price, net=base-disc, taxAmt=net*tax/100;
+        sub+=base; discT+=disc; taxT+=taxAmt;
+        items.push({ name:name||'Product', qty, price, discount:disc, tax, total:net+taxAmt });
+    });
+    const grand = sub - discT + taxT;
+    return {
+        logo: logoDataURL,
+        shop_name: v('shop_name'), shop_address: v('shop_address'),
+        shop_contact: v('shop_contact'), shop_email: v('shop_email'),
+        customer_name: v('customer_name'), customer_contact: v('customer_contact'), customer_address: v('customer_address'),
+        invoice_no: v('invoice_no'), invoice_date: v('invoice_date'),
+        payment_method: v('payment_method'),
+        advance: parseFloat(v('advance_payment'))||0,
+        balance: parseFloat(v('balance_due'))||0,
+        notes: v('notes'),
+        items, subtotal: sub, discountTotal: discT, taxTotal: taxT, grandTotal: grand
+    };
+}
+
+/* ── Preview & Download ──────────────────────── */
+function previewInvoice() {
+    const d = collectStationery();
+    if (!d.items.length) return alert('Add at least one product before previewing.');
+    window.open(buildStationeryPDF(d, getTemplate()).output('bloburl'), '_blank');
+}
+function downloadPDF() {
+    const d = collectStationery();
+    if (!d.items.length) return alert('Add at least one product before downloading.');
+    const name = (d.customer_name||'invoice').replace(/\s+/g,'_');
+    buildStationeryPDF(d, getTemplate()).save(`Stationery_Invoice_${name}.pdf`);
+}
+
+/* ── PDF Builder ─────────────────────────────── */
+function imgType(url) {
+    if (!url) return null;
+    const m = url.match(/^data:image\/(png|jpeg|jpg);base64,/i);
+    return m ? (m[1].toUpperCase()==='JPG'?'JPEG':m[1].toUpperCase()) : null;
+}
+
+function buildStationeryPDF(d, tpl) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p','pt','a4');
+    const W = doc.internal.pageSize.getWidth();
+    const H = doc.internal.pageSize.getHeight();
+    const M = 36;
+
+    /* ── CLASSIC ─────────────────────────────── */
+    if (tpl === 'classic') {
+        doc.setFillColor(245,158,11);
+        doc.rect(0,0,W,66,'F');
+        doc.setFillColor(180,83,9);
+        doc.rect(0,66,W,4,'F');
+
+        if (d.logo) { try { doc.addImage(d.logo, imgType(d.logo)||'PNG', M, 10, 46, 46); } catch(e){} }
+
+        doc.setFontSize(22); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+        doc.text('SALES INVOICE', M+(d.logo?54:0), 32);
+        doc.setFontSize(8.5); doc.setFont('helvetica','normal'); doc.setTextColor(254,243,199);
+        doc.text(d.shop_name||'', M+(d.logo?54:0), 46);
+        doc.text(`# ${d.invoice_no}  |  ${d.invoice_date||''}`, W-M, 36, {align:'right'});
+
+        let y = 84;
+        doc.setFillColor(254,252,232);
+        doc.setDrawColor(253,230,138);
+        doc.roundedRect(M, y, (W-M*2-8)/2, 68, 5,5,'FD');
+        doc.roundedRect(M+(W-M*2-8)/2+8, y, (W-M*2-8)/2, 68, 5,5,'FD');
+
+        doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(161,98,7);
+        doc.text('SHOP', M+8, y+11); doc.text('CUSTOMER', M+(W-M*2-8)/2+16, y+11);
+        doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.setTextColor(120,53,15);
+        doc.text(d.shop_name||'', M+8, y+22, {maxWidth:(W-M*2-8)/2-14});
+        doc.text(d.customer_name||'', M+(W-M*2-8)/2+16, y+22, {maxWidth:(W-M*2-8)/2-14});
+        doc.setFontSize(8.5); doc.setFont('helvetica','normal'); doc.setTextColor(120,53,15);
+        doc.text([d.shop_address||'', d.shop_contact||''].filter(Boolean).join('\n'), M+8, y+33, {maxWidth:(W-M*2-8)/2-14});
+        doc.text([d.customer_address||'', d.customer_contact||''].filter(Boolean).join('\n'), M+(W-M*2-8)/2+16, y+33, {maxWidth:(W-M*2-8)/2-14});
+        y += 78;
+
+        doc.autoTable({
+            head: [['#','Product','Qty','Price','Disc.','Tax','Total']],
+            body: d.items.map((it,i)=>[i+1, it.name, it.qty, `₹${it.price.toFixed(2)}`, `₹${it.discount.toFixed(2)}`, `${it.tax}%`, `₹${it.total.toFixed(2)}`]),
+            startY: y,
+            styles: { fontSize:9.5, cellPadding:6.5 },
+            headStyles: { fillColor:[245,158,11], textColor:255, fontStyle:'bold' },
+            alternateRowStyles: { fillColor:[255,251,235] },
+            columnStyles: { 0:{cellWidth:22}, 2:{halign:'center'}, 3:{halign:'right'}, 4:{halign:'right'}, 5:{halign:'center'}, 6:{halign:'right',fontStyle:'bold'} },
+            margin:{left:M,right:M}
+        });
+
+        let gy = doc.lastAutoTable.finalY + 10;
+        doc.setFillColor(245,158,11);
+        doc.roundedRect(W-M-200, gy, 200, 30, 6,6,'F');
+        doc.setFontSize(12); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+        doc.text('TOTAL', W-M-190, gy+19);
+        doc.text(`₹${d.grandTotal.toFixed(2)}`, W-M-10, gy+19, {align:'right'});
+        doc.setFontSize(7.5); doc.setFont('helvetica','normal'); doc.setTextColor(161,98,7);
+        doc.text(`Sub: ₹${d.subtotal.toFixed(2)}  Disc: ₹${d.discountTotal.toFixed(2)}  Tax: ₹${d.taxTotal.toFixed(2)}`, W-M-10, gy+44, {align:'right'});
+
+        if (d.notes) {
+            doc.setFontSize(8.5); doc.setFont('helvetica','italic'); doc.setTextColor(107,114,128);
+            doc.text(`"${d.notes}"`, M, gy+28, {maxWidth:W-M*2-220});
         }
-        reader.readAsDataURL(file);
+        doc.setFillColor(245,158,11);
+        doc.rect(0, H-20, W, 20, 'F');
+        doc.setFontSize(7.5); doc.setTextColor(255,255,255); doc.setFont('helvetica','normal');
+        doc.text('Thank you for your purchase!', M, H-8);
+        doc.text(d.shop_name||'', W-M, H-8, {align:'right'});
     }
-});
 
-// ==================== PDF Generation ====================
-function downloadPDF(){
-    const { jsPDF }=window.jspdf;
-    const doc=new jsPDF('p','pt','a4');
+    /* ── MODERN ──────────────────────────────── */
+    else if (tpl === 'modern') {
+        doc.setFillColor(29,78,216);
+        doc.rect(0,0,W,72,'F');
+        doc.setFillColor(59,130,246);
+        doc.rect(0,72,W,4,'F');
 
-    // Bill From
-    const shopName=document.querySelector('[name="shop_name"]').value;
-    const shopAddress=document.querySelector('[name="shop_address"]').value;
-    const shopContact=document.querySelector('[name="shop_contact"]').value;
-    const shopEmail=document.querySelector('[name="shop_email"]').value;
+        if (d.logo) { try { doc.addImage(d.logo, imgType(d.logo)||'PNG', M, 12, 48, 48); } catch(e){} }
+        doc.setFontSize(22); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+        doc.text('INVOICE', M+(d.logo?56:0), 34);
+        doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(147,197,253);
+        doc.text(`${d.shop_name||'Shop'}  ·  # ${d.invoice_no}  ·  ${d.invoice_date||''}`, M+(d.logo?56:0), 48);
 
-    doc.setFontSize(14); doc.text("Bill From:",40,40);
-    doc.setFontSize(12);
-    doc.text(`${shopName}`,40,60);
-    doc.text(`${shopAddress}`,40,75);
-    doc.text(`Contact: ${shopContact}`,40,90);
-    doc.text(`Email: ${shopEmail}`,40,105);
+        let y = 88;
+        doc.setFillColor(239,246,255);
+        doc.roundedRect(M, y, W-M*2, 68, 6,6,'F');
+        doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(37,99,235);
+        doc.text('SHOP DETAILS', M+10, y+12); doc.text('CUSTOMER', W/2+8, y+12);
+        doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.setTextColor(15,23,42);
+        doc.text(d.shop_name||'', M+10, y+24, {maxWidth:W/2-M-12});
+        doc.text(d.customer_name||'', W/2+8, y+24, {maxWidth:W/2-M-12});
+        doc.setFontSize(8.5); doc.setFont('helvetica','normal'); doc.setTextColor(71,85,105);
+        doc.text([d.shop_address||'',d.shop_contact||'',d.shop_email||''].filter(Boolean).join('\n'), M+10, y+35, {maxWidth:W/2-M-12});
+        doc.text([d.customer_address||'',d.customer_contact||''].filter(Boolean).join('\n'), W/2+8, y+35, {maxWidth:W/2-M-12});
+        y += 78;
 
-    // Bill To
-    const customerName=document.querySelector('[name="customer_name"]').value;
-    const customerContact=document.querySelector('[name="customer_contact"]').value;
-    const invoiceNo=document.querySelector('[name="invoice_no"]').value;
-    const invoiceDate=document.querySelector('[name="invoice_date"]').value;
+        doc.autoTable({
+            head: [['#','Product','Qty','Price','Disc.','Tax','Total']],
+            body: d.items.map((it,i)=>[i+1, it.name, it.qty, `₹${it.price.toFixed(2)}`, `₹${it.discount.toFixed(2)}`, `${it.tax}%`, `₹${it.total.toFixed(2)}`]),
+            startY: y,
+            styles: { fontSize:9.5, cellPadding:6.5 },
+            headStyles: { fillColor:[15,23,42], textColor:255, fontStyle:'bold' },
+            alternateRowStyles: { fillColor:[248,250,252] },
+            columnStyles: { 2:{halign:'center'}, 3:{halign:'right'}, 4:{halign:'right'}, 5:{halign:'center'}, 6:{halign:'right',fontStyle:'bold'} },
+            margin:{left:M,right:M}
+        });
 
-    doc.setFontSize(14); doc.text("Bill To:",300,40);
-    doc.setFontSize(12);
-    doc.text(`Name: ${customerName}`,300,60);
-    doc.text(`Contact: ${customerContact}`,300,75);
-    doc.text(`Invoice No: ${invoiceNo}`,300,90);
-    doc.text(`Invoice Date: ${invoiceDate}`,300,105);
+        let gy = doc.lastAutoTable.finalY + 12;
+        doc.setFillColor(29,78,216);
+        doc.roundedRect(W-M-190, gy, 190, 30, 6,6,'F');
+        doc.setFontSize(12); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+        doc.text('GRAND TOTAL', W-M-180, gy+19);
+        doc.text(`₹${d.grandTotal.toFixed(2)}`, W-M-10, gy+19, {align:'right'});
 
-    // Items Table
-    doc.autoTable({html:'#products-body',startY:130,theme:'grid'});
+        doc.setFillColor(15,23,42);
+        doc.rect(0, H-22, W, 22,'F');
+        doc.setFontSize(8); doc.setFont('helvetica','italic'); doc.setTextColor(148,163,184);
+        doc.text('Thank you for your purchase!', W/2, H-9, {align:'center'});
+    }
 
-    // Totals
-    const subtotal=document.getElementById("subtotal").innerText;
-    const discount=document.getElementById("discount-amount").innerText;
-    const tax=document.getElementById("tax-total").innerText;
-    const grandTotal=document.getElementById("grand-total").innerText;
-    const advance=parseFloat(document.querySelector('[name="advance_payment"]').value)||0;
-    const balance=parseFloat(document.querySelector('[name="balance_due"]').value)||0;
+    /* ── DARK ────────────────────────────────── */
+    else {
+        // Full-width dark header
+        doc.setFillColor(17,24,39);
+        doc.rect(0,0,W,H,'F');   // Dark background entire page
 
-    doc.text(`Subtotal: ${subtotal}`,400,doc.lastAutoTable.finalY+20);
-    doc.text(`Discount: ${discount}`,400,doc.lastAutoTable.finalY+35);
-    doc.text(`Tax: ${tax}`,400,doc.lastAutoTable.finalY+50);
-    doc.text(`Grand Total: ${grandTotal}`,400,doc.lastAutoTable.finalY+65);
-    doc.text(`Advance Payment: ₹${advance.toFixed(2)}`,400,doc.lastAutoTable.finalY+80);
-    doc.text(`Balance Due: ₹${balance.toFixed(2)}`,400,doc.lastAutoTable.finalY+95);
+        doc.setFillColor(31,41,55);
+        doc.rect(0,0,W,78,'F');
+        doc.setFillColor(245,158,11);
+        doc.rect(0,78,W,4,'F');
 
-    const notes=document.querySelector('[name="notes"]').value;
-    doc.text(`Notes: ${notes}`,40,doc.lastAutoTable.finalY+120);
+        if (d.logo) { try { doc.addImage(d.logo, imgType(d.logo)||'PNG', M, 14, 48, 50); } catch(e){} }
 
-    if(previewLogo.src){doc.addImage(previewLogo.src,'PNG',450,20,100,50);}
-    doc.save("stationery_invoice.pdf");
+        doc.setFontSize(26); doc.setFont('helvetica','bold'); doc.setTextColor(245,158,11);
+        doc.text('INVOICE', M+(d.logo?58:0), 38);
+        doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(156,163,175);
+        doc.text(`${d.shop_name||'Shop'}  ·  # ${d.invoice_no}  ·  ${d.invoice_date||''}`, M+(d.logo?58:0), 54);
+
+        let y = 96;
+        doc.setFillColor(31,41,55);
+        doc.setDrawColor(55,65,81);
+        doc.roundedRect(M, y, (W-M*2-8)/2, 68, 5,5,'FD');
+        doc.roundedRect(M+(W-M*2-8)/2+8, y, (W-M*2-8)/2, 68, 5,5,'FD');
+
+        doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(245,158,11);
+        doc.text('FROM', M+10, y+12); doc.text('BILL TO', M+(W-M*2-8)/2+18, y+12);
+        doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.setTextColor(249,250,251);
+        doc.text(d.shop_name||'', M+10, y+23, {maxWidth:(W-M*2-8)/2-14});
+        doc.text(d.customer_name||'', M+(W-M*2-8)/2+18, y+23, {maxWidth:(W-M*2-8)/2-14});
+        doc.setFontSize(8.5); doc.setFont('helvetica','normal'); doc.setTextColor(156,163,175);
+        doc.text([d.shop_address||'',d.shop_contact||''].filter(Boolean).join('\n'), M+10, y+35, {maxWidth:(W-M*2-8)/2-14});
+        doc.text([d.customer_address||'',d.customer_contact||''].filter(Boolean).join('\n'), M+(W-M*2-8)/2+18, y+35, {maxWidth:(W-M*2-8)/2-14});
+        y += 78;
+
+        doc.autoTable({
+            head: [['#','Product','Qty','Price','Disc.','Tax','Total']],
+            body: d.items.map((it,i)=>[i+1, it.name, it.qty, `₹${it.price.toFixed(2)}`, `₹${it.discount.toFixed(2)}`, `${it.tax}%`, `₹${it.total.toFixed(2)}`]),
+            startY: y,
+            styles: { fontSize:9.5, cellPadding:7, textColor:[249,250,251], fillColor:[31,41,55] },
+            headStyles: { fillColor:[245,158,11], textColor:[17,24,39], fontStyle:'bold' },
+            alternateRowStyles: { fillColor:[17,24,39] },
+            columnStyles: { 2:{halign:'center'}, 3:{halign:'right'}, 4:{halign:'right'}, 5:{halign:'center'}, 6:{halign:'right',fontStyle:'bold',textColor:[245,158,11]} },
+            margin:{left:M,right:M},
+            tableLineColor:[55,65,81], tableLineWidth:0.5
+        });
+
+        let gy = doc.lastAutoTable.finalY + 14;
+        doc.setFillColor(245,158,11);
+        doc.roundedRect(W-M-200, gy, 200, 34, 6,6,'F');
+        doc.setFontSize(13); doc.setFont('helvetica','bold'); doc.setTextColor(17,24,39);
+        doc.text('GRAND TOTAL', W-M-190, gy+21);
+        doc.text(`₹${d.grandTotal.toFixed(2)}`, W-M-10, gy+21, {align:'right'});
+
+        if (d.notes) {
+            doc.setFontSize(8.5); doc.setFont('helvetica','italic'); doc.setTextColor(156,163,175);
+            doc.text(`"${d.notes}"`, M, gy+20, {maxWidth:W-M*2-220});
+        }
+
+        doc.setFillColor(245,158,11);
+        doc.rect(0, H-22, W, 22,'F');
+        doc.setFontSize(7.5); doc.setFont('helvetica','bold'); doc.setTextColor(17,24,39);
+        doc.text('Thank you for your purchase!', M, H-9);
+        doc.text(d.shop_name||'', W-M, H-9, {align:'right'});
+    }
+
+    return doc;
 }
 
-// Form submission
-document.getElementById("stationery-invoice-form").addEventListener("submit",function(e){
-    e.preventDefault();
-    alert("Invoice saved! You can preview or download PDF.");
-});
-
-// Initialize first product row
+/* ── Init ──────────────────────────────────────── */
+addProductRow('Spiral Notebook A4', 5, 45, 0, 12);
 addProductRow();
 </script>
 {% endblock %}

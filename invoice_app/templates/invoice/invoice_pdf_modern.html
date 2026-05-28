@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<!-- Noto Sans: full Unicode coverage — renders ₹ $ € £ ¥ and all currency symbols correctly -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap">
 <style>
 @page {
     size: A4;
@@ -12,11 +14,13 @@
         color: #9ca3af;
         padding-bottom: 8mm;
         padding-right: 32px;
+        font-family: 'Noto Sans', Arial, sans-serif;
     }
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
-    font-family: 'Segoe UI', Arial, sans-serif;
+    /* Noto Sans has full Unicode currency support: ₹ $ € £ ¥ ₩ ₺ */
+    font-family: 'Noto Sans', 'Segoe UI', Arial, sans-serif;
     font-size: 10pt;
     color: #0f172a;
     background: #fff;

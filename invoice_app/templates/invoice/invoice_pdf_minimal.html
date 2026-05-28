@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<!-- Noto Serif: elegant serif with full Unicode — renders ₹ $ € £ ¥ correctly -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Sans:wght@400;500;600;700&display=swap">
 <style>
 @page {
     size: A4;
@@ -10,11 +12,13 @@
         content: "Page " counter(page);
         font-size: 8pt;
         color: #aaa;
+        font-family: 'Noto Sans', Arial, sans-serif;
     }
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
-    font-family: Georgia, 'Times New Roman', serif;
+    /* Noto Serif: elegant serif + full Unicode currency support: ₹ $ € £ ¥ ₩ ₺ */
+    font-family: 'Noto Serif', Georgia, serif;
     font-size: 10.5pt;
     color: #111;
     background: #fff;
@@ -76,7 +80,7 @@ body {
     text-transform: uppercase;
     letter-spacing: 1.5px;
     color: #888;
-    font-family: Arial, sans-serif;
+    font-family: 'Noto Sans', Arial, sans-serif;
     margin-bottom: 6px;
     font-weight: bold;
 }
@@ -94,7 +98,7 @@ body {
 .items-table thead tr { border-bottom: 2pt solid #111; }
 .items-table thead th {
     padding: 6px 8px;
-    font-family: Arial, sans-serif;
+    font-family: 'Noto Sans', Arial, sans-serif;
     font-size: 8pt;
     font-weight: 700;
     text-transform: uppercase;
@@ -143,11 +147,11 @@ body {
 /* ── FOOTER ─────────────────────────────────────── */
 .footer { display: flex; justify-content: space-between; align-items: flex-end; }
 .notes-col {}
-.notes-head { font-size: 8pt; font-weight: bold; font-family: Arial, sans-serif; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-bottom: 3px; }
+.notes-head { font-size: 8pt; font-weight: bold; font-family: 'Noto Sans', Arial, sans-serif; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-bottom: 3px; }
 .notes-body { font-size: 9pt; color: #444; line-height: 1.6; font-style: italic; }
 .sig-col { text-align: right; }
 .sig-line { border-top: 1pt solid #888; width: 120px; margin-bottom: 3px; margin-left: auto; }
-.sig-text { font-size: 8pt; color: #888; font-family: Arial, sans-serif; }
+.sig-text { font-size: 8pt; color: #888; font-family: 'Noto Sans', Arial, sans-serif; }
 
 .thank-note {
     margin-top: 20px;

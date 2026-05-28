@@ -1,78 +1,90 @@
-{% comment %} <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Invoice #{{ invoice.invoice_no }}</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.2/dist/tailwind.min.css" rel="stylesheet">
-    <style>
-        /* Minimal styling for PDF */
-        body { font-family: 'Inter', sans-serif; }
-        .table-auto th, .table-auto td { border: 1px solid #ccc; padding: 6px; }
-    </style>
+<meta charset="UTF-8">
+<title>Invoice #{{ invoice.invoice_no }}</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&display=swap">
+<style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: 'Noto Sans', Arial, sans-serif; font-size:12px; color:#333; }
+    table { border-collapse: collapse; width:100%; }
+    h1 { font-size:24px; margin-bottom:10px; }
+    .header { text-align:center; margin-bottom:20px; }
+    .invoice-info td { padding:5px; vertical-align: top; }
+    .items th, .items td { border:1px solid #ccc; padding:8px; text-align:left; }
+    .items th { background:#f0f0f0; }
+    .totals { margin-top:20px; width:300px; float:right; }
+    .totals td { padding:5px; }
+    .totals .label { text-align:left; }
+    .totals .amount { text-align:right; }
+    .footer { text-align:center; margin-top:50px; font-size:10px; color:#777; }
+    {% if template == "modern" %}
+        body { font-family: 'Segoe UI', sans-serif; color:#222; }
+        .header h1 { color:#1a73e8; }
+        .items th { background:#1a73e8; color:white; }
+        .totals { width:100%; float:none; }
+    {% elif template == "minimal" %}
+        body { font-family: Helvetica, sans-serif; color:#111; }
+        .items th, .items td { border:none; padding:6px; }
+        .items th { border-bottom:1px solid #000; }
+    {% endif %}
+</style>
 </head>
-<body class="p-6 bg-white">
+<body>
 
-    <!-- Header / Logo -->
-    <div class="flex justify-between items-center mb-6">
-        <div>
-            {% if invoice.logo %}
-                <img src="{{ invoice.logo.url }}" alt="Logo" class="h-16">
-            {% else %}
-                <div class="text-2xl font-bold text-blue-600">InvoiceGen</div>
-            {% endif %}
-        </div>
-        <div class="text-right">
-            <p class="font-semibold">Invoice #: {{ invoice.invoice_no }}</p>
-            <p>Date: {{ invoice.date }}</p>
-        </div>
-    </div>
+<div class="header">
+    <h1>Invoice</h1>
+    <p>Invoice No: {{ invoice.invoice_no }} | Date: {{ invoice.date }}</p>
+</div>
 
-    <!-- Customer Info -->
-    <div class="mb-6">
-        <p class="font-semibold">Customer:</p>
-        <p>{{ invoice.customer.name }}</p>
-        {% if invoice.order_ref %}
-            <p>Order Ref / PO No: {{ invoice.order_ref }}</p>
-        {% endif %}
-        {% if invoice_type == 'hospital' %}
-            <p>Doctor: {{ invoice.doctor.name }}</p>
-            <p>Department: {{ invoice.department.name }}</p>
-        {% endif %}
-    </div>
+<table class="invoice-info">
+<tr>
+<td>
+<strong>Bill To:</strong><br>
+{{ invoice.customer.name }}<br>
+{{ invoice.customer.address }}<br>
+{{ invoice.customer.email }}
+</td>
+<td>
+<strong>From:</strong><br>
+{{ invoice.company_name }}<br>
+{{ invoice.company_address }}<br>
+{{ invoice.company_email }}
+</td>
+</tr>
+</table>
 
-    <!-- Items Table -->
-    <div class="overflow-x-auto mb-4">
-        <table class="table-auto w-full border-collapse">
-            <thead>
-                <tr class="bg-gray-100">
-                    <th class="border px-2 py-1">Item / Service</th>
-                    <th class="border px-2 py-1">Qty</th>
-                    <th class="border px-2 py-1">Price</th>
-                    <th class="border px-2 py-1">Tax %</th>
-                    <th class="border px-2 py-1">Total</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in invoice.items.all %}
-                <tr>
-                    <td class="border px-2 py-1">{{ item.name }}</td>
-                    <td class="border px-2 py-1 text-center">{{ item.qty }}</td>
-                    <td class="border px-2 py-1 text-right">₹{{ item.price }}</td>
-                    <td class="border px-2 py-1 text-center">{{ item.tax }}%</td>
-                    <td class="border px-2 py-1 text-right">₹{{ item.total }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+<table class="items">
+<thead>
+<tr>
+<th>#</th>
+<th>Description</th>
+<th>Qty</th>
+<th>Rate</th>
+<th>Total</th>
+</tr>
+</thead>
+<tbody>
+{% for item in invoice.items.all %}
+<tr>
+<td>{{ forloop.counter }}</td>
+<td>{{ item.product.name }}</td>
+<td>{{ item.quantity }}</td>
+<td>{{ item.price }}</td>
+<td>{{ item.total }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
 
-    <!-- Totals -->
-    <div class="text-right mt-4">
-        <p>Subtotal: ₹{{ invoice.subtotal }}</p>
-        <p>Tax: ₹{{ invoice.tax }}</p>
-        <p>Discount: ₹{{ invoice.discount }}</p>
-        <p class="font-bold text-lg">Grand Total: ₹{{ invoice.grand_total }}</p>
-    </div>
+<table class="totals">
+<tr><td class="label">Subtotal:</td><td class="amount">{{ invoice.subtotal }}</td></tr>
+<tr><td class="label">Tax:</td><td class="amount">{{ invoice.tax }}</td></tr>
+<tr><td class="label">Discount:</td><td class="amount">{{ invoice.discount }}</td></tr>
+<tr><td class="label">Total:</td><td class="amount">{{ invoice.total }}</td></tr>
+</table>
+
+<div class="footer">Thank you for your business!</div>
 
 </body>
-</html> {% endcomment %}
+</html>

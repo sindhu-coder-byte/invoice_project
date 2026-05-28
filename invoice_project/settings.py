@@ -1,8 +1,12 @@
 import os
 from pathlib import Path
 import dj_database_url
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load .env for local development (no-op in production where env vars are set directly)
+load_dotenv(BASE_DIR / '.env')
 
 # ── Security ──────────────────────────────────────────────────────────────────
 SECRET_KEY = os.environ.get(
